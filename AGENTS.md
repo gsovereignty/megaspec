@@ -64,12 +64,12 @@ Always open `@/prd.md` when the request:
 
 When asked to create a git commit message:
 1. **Check uncommitted changes** — inspect the current set of staged and unstaged files to understand what has changed.
-2. **Write a single-line problem statement** — the commit message MUST describe the *problem being solved*, NOT the solution or the change made.
-3. **Keep it short** — one line, imperative mood, no implementation details.
+2. **Write a single-line problem statement** — the commit message MUST start with `problem: ` and describe the *problem being solved*, NOT the solution or the change made.
+3. **Keep it short** — one line, no implementation details.
 
-Good: `Agents lack a mandatory PRD-check step before implementation`
+Good: `problem: Agents lack a mandatory PRD-check step before implementation`
 Bad: `Add rule to always check prd.md before implementing`
-Good: `Published docs can contain unresolved cross-references`
+Good: `problem: Published docs can contain unresolved cross-references`
 Bad: `Add cross-reference validation to publish command`
 
 ## Cross-References
