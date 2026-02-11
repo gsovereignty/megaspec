@@ -3,6 +3,11 @@
 import { Command } from 'commander';
 import { createOutputContext, type OutputContext } from './utils/output-context.js';
 import { registerInitCommand } from './commands/init.js';
+import { registerListCommand, registerShowCommand } from './commands/list.js';
+import { registerValidateCommand } from './commands/validate.js';
+import { registerPublishCommand } from './commands/publish.js';
+import { registerArchiveCommand } from './commands/archive.js';
+import { registerMetricsCommand } from './commands/metrics.js';
 
 const program = new Command();
 
@@ -27,6 +32,13 @@ program.hook('preAction', (thisCommand) => {
 });
 
 // Register commands
-registerInitCommand(program, () => outputCtx);
+const getCtx = () => outputCtx;
+registerInitCommand(program, getCtx);
+registerListCommand(program, getCtx);
+registerShowCommand(program, getCtx);
+registerValidateCommand(program, getCtx);
+registerPublishCommand(program, getCtx);
+registerArchiveCommand(program, getCtx);
+registerMetricsCommand(program, getCtx);
 
 program.parse();
