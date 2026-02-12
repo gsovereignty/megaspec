@@ -6,7 +6,7 @@ Instructions for AI coding assistants using OpenSpec for spec-driven development
 
 **When implementing any DocFlow feature**, always read `@/prd.md` first. The PRD contains:
 - All traceable requirements (DF-001 through DF-085) with OpenSpec implementation prompts
-- Research foundations (RF-01 through RF-18) that back each validation rule
+- Research foundations (RF-01 through RF-19) that back each validation rule
 - Validation profiles, engagement scoring specs, and agent workflow contracts
 - The traceability matrix mapping requirements to dependencies and test methods
 

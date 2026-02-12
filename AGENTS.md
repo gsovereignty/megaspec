@@ -24,11 +24,12 @@ These instructions are for AI assistants implementing or modifying DocFlow.
 ## Authoritative Requirements Source
 
 **Always read `@/prd.md` before implementing any DocFlow feature, fix, or change.** The PRD is the single source of truth for:
-- All traceable requirements (DF-001 through DF-085, DF-040P through DF-043P)
-- Research foundations (RF-01 through RF-18) backing each requirement
+- All traceable requirements (DF-001 through DF-085, DF-040P through DF-043P, DF-090 through DF-093)
+- Research foundations (RF-01 through RF-19) backing each requirement
 - OpenSpec implementation prompts — the exact instructions for building each feature
 - Validation profiles and engagement scoring specifications
 - Agent workflow definitions and role contracts
+- LLM artifact detection dictionary and validation rules
 
 ## When to Reference the PRD
 

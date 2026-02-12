@@ -1,7 +1,7 @@
 # cli-foundation Specification
 
 ## Purpose
-TBD - created by archiving change add-cli-foundation. Update Purpose after archive.
+Defines the foundational CLI infrastructure: project initialization (`docflow init`), content-type templates, and global flags (`--json`, `--no-interactive`) inherited by all commands.
 ## Requirements
 ### Requirement: Project Initialization
 

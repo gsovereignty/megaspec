@@ -1,7 +1,7 @@
 # core-commands Specification
 
 ## Purpose
-TBD - created by archiving change add-core-commands. Update Purpose after archive.
+Defines the DocFlow CLI commands for managing the document lifecycle: listing, showing, validating (with watch mode), publishing (with safety gates), archiving, and computing engagement metrics.
 ## Requirements
 ### Requirement: List Drafts
 

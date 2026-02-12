@@ -18,11 +18,11 @@ DocFlow lives alongside OpenSpec in the megaspec repo but is fully independent â
 
 - **Language**: TypeScript (strict mode)
 - **Runtime**: Node.js (>=18 LTS)
-- **CLI framework**: commander or oclif
+- **CLI framework**: commander
 - **Markdown parsing**: remark / unified + mdast (structural validation)
 - **NLP / prose checks**: retext + plugins (passive voice, readability, sentence complexity)
 - **Readability metrics**: Flesch-Kincaid, custom scoring engine
-- **Style linting**: Vale integration (optional external linter)
+- **Style linting**: Built-in validation rules; Vale integration planned (optional external linter)
 - **Testing**: vitest + fixture-based golden tests
 - **Storage**: Plain Markdown files + Git (no database)
 - **Package manager**: pnpm
@@ -59,7 +59,7 @@ DocFlow lives alongside OpenSpec in the megaspec repo but is fully independent â
 
 - `main` branch is always deployable
 - Feature branches named `feat/[description]` or `fix/[description]`
-- Conventional commits: `feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`
+- Problem-statement commits: messages start with `problem: ` describing the problem solved
 - PRs require passing CI + human review
 - Squash merge to main
 

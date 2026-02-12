@@ -1,7 +1,7 @@
 # validation-engine Specification
 
 ## Purpose
-TBD - created by archiving change add-core-commands. Update Purpose after archive.
+Defines the rule-based validation engine: pluggable rules with PASS/WARN/FAIL diagnostics, content-type profiles (tutorial, reference, guide, whitepaper), and validation rules for cognitive load, engagement mechanics, readability, visual support, document structure, and LLM artifact detection.
 ## Requirements
 ### Requirement: Validation Rule Engine
 
