@@ -7,7 +7,7 @@ import { output, type OutputContext } from '../utils/output-context.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const DIRECTORIES = ['publish', 'drafts', 'archive', 'templates'];
+const DIRECTORIES = ['publish', 'drafts', 'archive', 'templates', 'docflow'];
 
 const TEMPLATE_FILES = [
   'tutorial.md',
@@ -119,6 +119,22 @@ export function scaffold(targetDir: string): {
     }
   }
 
+  // Copy AGENTS.md into docflow/
+  const agentsSourcePath = path.join(templatesSourceDir, 'agents.md');
+  const agentsDestPath = path.join(targetDir, 'docflow', 'AGENTS.md');
+  let agentsContent: string;
+  if (fs.existsSync(agentsSourcePath)) {
+    agentsContent = fs.readFileSync(agentsSourcePath, 'utf-8');
+  } else {
+    agentsContent = generateFallbackAgentsTemplate();
+  }
+  const agentsResult = writeFileIfNotExists(agentsDestPath, agentsContent);
+  if (agentsResult.created) {
+    created.push('docflow/AGENTS.md');
+  } else {
+    skipped.push('docflow/AGENTS.md');
+  }
+
   return { created, skipped };
 }
 
@@ -132,6 +148,45 @@ audience: ''
 ---
 
 # ${type.charAt(0).toUpperCase() + type.slice(1)}
+`;
+}
+
+function generateFallbackAgentsTemplate(): string {
+  return `# DocFlow Writing Instructions
+
+These instructions are for AI coding assistants helping subject matter experts (SMEs) write documentation using DocFlow.
+
+## Quick Reference Checklist
+
+- [ ] Opening hook in first paragraph
+- [ ] Question before answer in each section
+- [ ] Concrete examples (no foo/bar)
+- [ ] Active voice with "you"
+- [ ] Short paragraphs (≤6 sentences)
+- [ ] Short lists (≤7 items)
+- [ ] Descriptive headings
+- [ ] Next steps section
+- [ ] No LLM vocabulary
+- [ ] Agent Contributions section at end of every artifact
+
+## Agent Contributions Format
+
+Every artifact MUST end with:
+
+\`\`\`markdown
+## Agent Contributions
+
+### Role
+[role and mode]
+
+### Assumptions
+- [list of assumptions]
+
+### Unknowns
+- [items needing verification, or "None"]
+\`\`\`
+
+Run \`docflow init\` with the bundled templates for the full instruction set.
 `;
 }
 
