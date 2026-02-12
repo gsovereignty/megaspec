@@ -192,22 +192,23 @@ The system SHALL validate readability: Flesch-Kincaid grade level against profil
 
 Traces to: DF-050, DF-051, DF-052, DF-053, DF-054, DF-055
 
-#### Scenario: High Flesch-Kincaid grade
+#### Scenario: Topic sentence not frontloaded
 
-- **WHEN** FK grade level is 14 and profile target is 10
-- **THEN** WARN: "Flesch-Kincaid Grade Level is 14 (target: 10). [RF-11]"
+- **GIVEN** a paragraph where the dominant non-stopword keyword "caching" appears only in sentence 3
+- **WHEN** validation runs
+- **THEN** WARN: "Paragraph at line N may not frontload its main point. The key topic 'caching' first appears in sentence 3. [RF-11]"
 
-#### Scenario: Excessive passive voice
+#### Scenario: Topic sentence properly frontloaded
 
-- **WHEN** 30% of sentences are passive voice
-- **THEN** WARN: "Passive voice detected in 30% of sentences (max: 20%). [RF-17]"
+- **GIVEN** a paragraph where the dominant keyword appears in sentence 1
+- **WHEN** validation runs
+- **THEN** no diagnostic is emitted for DF-055
 
-#### Scenario: Vague heading
+#### Scenario: Single-sentence paragraph skipped
 
-- **WHEN** a heading is exactly "Overview" with no qualifier
-- **THEN** WARN: "Heading 'Overview' at line N is non-descriptive. [RF-11]"
-
----
+- **GIVEN** a paragraph with only one sentence
+- **WHEN** validation runs
+- **THEN** no diagnostic is emitted for DF-055
 
 ### Requirement: Visual Support Validation
 
