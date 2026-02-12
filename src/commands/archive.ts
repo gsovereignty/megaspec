@@ -16,23 +16,11 @@ export function registerArchiveCommand(
       const ctx = getCtx();
       const projectDir = process.cwd();
 
+      // Archive only from publish/ (drafts must be published first)
       const publishPath = path.join(projectDir, 'publish', `${slug}.md`);
-      const draftDir = path.join(projectDir, 'drafts', slug);
 
-      // Find the source file
-      let sourcePath: string | null = null;
-      let sourceLocation: string = '';
-
-      if (fs.existsSync(publishPath)) {
-        sourcePath = publishPath;
-        sourceLocation = 'publish';
-      } else if (fs.existsSync(path.join(draftDir, 'content.md'))) {
-        sourcePath = path.join(draftDir, 'content.md');
-        sourceLocation = 'drafts';
-      }
-
-      if (!sourcePath) {
-        outputError(ctx, `Document "${slug}" not found in publish/ or drafts/`, {
+      if (!fs.existsSync(publishPath)) {
+        outputError(ctx, `Document "${slug}" not found in publish/. Only published documents can be archived.`, {
           error: 'not_found',
           slug,
         });
@@ -41,7 +29,7 @@ export function registerArchiveCommand(
       }
 
       // Read current content
-      const raw = fs.readFileSync(sourcePath, 'utf-8');
+      const raw = fs.readFileSync(publishPath, 'utf-8');
       const { data, content } = matter(raw);
 
       // Add archive metadata
@@ -59,23 +47,26 @@ export function registerArchiveCommand(
         fs.mkdirSync(archiveDir, { recursive: true });
       }
 
-      // Write to archive (flat)
-      const archivePath = path.join(archiveDir, `${slug}.md`);
+      // Date-prefixed filename: YYYY-MM-DD-slug.md
+      const datePrefix = new Date().toISOString().slice(0, 10);
+      const archiveFilename = `${datePrefix}-${slug}.md`;
+      const archivePath = path.join(archiveDir, archiveFilename);
       fs.writeFileSync(archivePath, updatedContent, 'utf-8');
 
-      // Remove from source location
-      if (sourceLocation === 'publish') {
-        fs.unlinkSync(publishPath);
-      } else if (sourceLocation === 'drafts') {
-        // Remove entire draft directory
-        fs.rmSync(draftDir, { recursive: true, force: true });
+      // Remove published file
+      fs.unlinkSync(publishPath);
+
+      // Also move drafts/<slug>/ to archive/<date>-<slug>/ if it exists
+      const draftDir = path.join(projectDir, 'drafts', slug);
+      if (fs.existsSync(draftDir)) {
+        const archiveDraftDir = path.join(archiveDir, `${datePrefix}-${slug}`);
+        fs.renameSync(draftDir, archiveDraftDir);
       }
 
       const relPath = path.relative(projectDir, archivePath);
       output(ctx, `✓ Archived "${slug}" to ${relPath}${opts.reason ? ` (reason: ${opts.reason})` : ''}`, {
         success: true,
         slug,
-        from: sourceLocation,
         path: relPath,
         reason: opts.reason ?? null,
       });

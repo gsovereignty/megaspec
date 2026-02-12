@@ -45,6 +45,9 @@ const RULE_IDS = {
   DIAGRAM_SUGGESTION: 'DF-057',
   IMAGE_ALT_TEXT: 'DF-058',
   IMAGE_PATH: 'DF-059',
+
+  // LLM artifact detection
+  LLM_ARTIFACTS: 'DF-091',
 } as const;
 
 // Common rules shared across all profiles
@@ -64,6 +67,7 @@ function commonRules(): ProfileRule[] {
     { ruleId: RULE_IDS.HEADING_DESCRIPTIVENESS, severity: 'WARN', rule: () => [] },
     { ruleId: RULE_IDS.IMAGE_ALT_TEXT, severity: 'FAIL', rule: () => [] },
     { ruleId: RULE_IDS.IMAGE_PATH, severity: 'FAIL', rule: () => [] },
+    { ruleId: RULE_IDS.LLM_ARTIFACTS, severity: 'WARN', rule: () => [] },
   ];
 }
 

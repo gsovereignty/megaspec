@@ -61,3 +61,20 @@ export function getLineNumber(text: string, offset: number): number {
   const prefix = text.slice(0, offset);
   return prefix.split('\n').length;
 }
+
+/**
+ * Strip the ## Agent Contributions section and everything beneath it
+ * until the next ## heading or end of file. This removes internal
+ * agent metadata before publishing.
+ */
+export function stripAgentContributions(content: string): string {
+  // Match ## Agent Contributions heading through the next ## heading or EOF
+  return content.replace(
+    /\n## Agent Contributions\s*\n[\s\S]*?(?=\n## (?!#))|(\n## Agent Contributions\s*\n[\s\S]*$)/m,
+    (match, atEnd) => {
+      // If captured by the "at end" group, replace entirely
+      if (atEnd !== undefined) return '';
+      return '';
+    },
+  );
+}

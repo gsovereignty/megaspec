@@ -53,6 +53,7 @@ The validation rules and content structure are grounded in peer-reviewed researc
 | RF-16 | Narrative nonfiction | Talese, Wolfe, McPhee | Concrete detail, scene-setting, specificity | Generic placeholder detection (foo/bar flagging) |
 | RF-17 | Voice | Strunk & White; Zinsser | Active voice, conversational tone, "you" focus | Active voice ratio, pronoun analysis |
 | RF-18 | Story structure | Campbell, *Hero with a Thousand Faces* | Hero's journey: ordinary → call → threshold → return | Tutorial narrative arc validation |
+| RF-19 | LLM excess vocabulary | Kobak et al. (2024), "Delving into LLM-assisted writing", *Science Advances* | LLMs produce statistically detectable excess usage of certain style words (379 words with elevated frequency post-ChatGPT); these are predominantly verbs and adjectives unrelated to content | LLM artifact detection, vocabulary cleansing |
 
 ---
 
@@ -430,6 +431,31 @@ The validation rules and content structure are grounded in peer-reviewed researc
 
 ---
 
+### 5.11 LLM Artifact Detection
+
+| ID | Requirement | Priority | Research | Verification |
+|---|---|---|---|---|
+| DF-090 | The system SHALL maintain a curated dictionary of LLM-telltale patterns organized into categories: (a) overused style words derived from peer-reviewed excess vocabulary research, (b) typographic artifacts (em dashes, smart quotes, decorative emoji, bullet-style emoji), (c) filler phrases and hedge phrases characteristic of LLM output, and (d) structural patterns (excessive adverb-verb pairs, formulaic transitions). | P0 | RF-19 | Verify dictionary contains all categories with ≥10 entries each. |
+| DF-091 | The system SHALL provide a `scan-llm-artifacts` validation rule that detects LLM-telltale patterns in document content and emits WARN diagnostics with the matched pattern, line number, and a suggested human-written replacement. | P0 | RF-19 | Write content containing "delve", "tapestry", "landscape", em dashes, and "It's worth noting that"; validate; confirm WARN per match with replacements. |
+| DF-092 | The `docflow validate` command SHALL include a `--strip-llm` flag that, when set, outputs a cleaned version of the document with all detected LLM artifacts replaced by their suggested alternatives (or removed where no replacement exists), writing the result to stdout or a specified output file. | P1 | RF-19 | Run `docflow validate --strip-llm` on content with 5+ artifacts; verify output contains replacements and no remaining artifacts. |
+| DF-093 | The `scan-llm-artifacts` rule SHALL be included in all validation profiles at WARN severity, and the publish gate SHALL emit an advisory count of remaining LLM artifacts (not blocking). | P0 | RF-19 | Publish a document with LLM artifacts present; confirm advisory message with count but successful publish. |
+
+#### OpenSpec Prompts — LLM Artifact Detection
+
+**DF-090**:
+> Create `src/validators/llm-artifacts.ts` containing a curated dictionary `LLM_ARTIFACT_PATTERNS` organized into four categories. **(a) Overused style words** (from Kobak et al. 2024 excess vocabulary research): single words that LLMs use at statistically elevated rates. Include at minimum: `delve`, `delves`, `delving`, `tapestry`, `landscape`, `comprehensive`, `intricate`, `nuanced`, `multifaceted`, `pivotal`, `crucial`, `furthermore`, `moreover`, `notably`, `underscores`, `showcasing`, `leveraging`, `harnessing`, `fostering`, `streamlining`, `facilitating`, `illuminating`, `elucidating`, `groundbreaking`, `commendable`, `meticulous`, `meticulously`, `encompassing`, `realm`, `paradigm`, `holistic`, `robust`, `seamless`, `seamlessly`, `transformative`, `unparalleled`, `invaluable`, `indispensable`, `imperative`, `formidable`, `burgeoning`, `cutting-edge`, `spearheading`, `revolutionize`, `revolutionizing`, `underscored`, `underscoring`, `accentuating`, `intricacies`, `adept`, `poised`, `endeavors`, `endeavours`, `interplay`, `synergy`, `synergies`, `pinnacle`, `bedrock`, `cornerstone`, `underpinning`, `orchestrating`, `navigating`. Each word should have a suggested replacement or "[remove or rephrase]" instruction. **(b) Typographic artifacts**: em dash `—` (suggest: `–` or ` - `), decorative/filler emoji (🚀, 💡, ✨, 🎯, 🔑, 🌟, ⭐, 🏆, 📌, 🔥, 💪, 🎉, 👉, ⚡, 🤔, 🧠, 📝, 🛠️, 🔍, 📊), smart/curly quotes `""''` (suggest: straight quotes). **(c) Filler/hedge phrases**: `It's worth noting that`, `It is important to note that`, `It should be noted that`, `In today's rapidly evolving`, `In the ever-evolving landscape of`, `In this comprehensive guide`, `Let's dive in`, `Let's delve into`, `Without further ado`, `At the end of the day`, `In conclusion,` (at paragraph start), `To summarize,`, `As we navigate`, `As we delve`, `This is a game-changer`, `game-changing`, `Take it to the next level`, `best practices`, `In order to` (suggest: `To`), `Due to the fact that` (suggest: `Because`), `In the realm of` (suggest: `In`), `A myriad of` (suggest: `Many`), `Serves as a testament to`, `Is a testament to`. **(d) Structural patterns**: regex for sentences starting with `Additionally, `, `Furthermore, `, `Moreover, `, `Consequently, `, `Notably, `, `Importantly, ` (overused conjunctive adverb openers). Export the dictionary and a `scanLlmArtifacts(content: string): LlmArtifactMatch[]` function returning `{ line: number, column: number, pattern: string, category: string, replacement: string, message: string }` per match.
+
+**DF-091**:
+> Register a validation rule `scan-llm-artifacts` in the rule registry. This rule takes a `ValidationContext` and calls `scanLlmArtifacts(ctx.rawContent)`. For each match, emit a WARN diagnostic: `LLM artifact detected: "${pattern}" — ${replacement} [RF-19]`. Include the line number. The rule ID is `llm-artifacts`. Use severity WARN (never FAIL) because some flagged words may be intentionally used by the author.
+
+**DF-092**:
+> Add `--strip-llm` flag to `registerValidateCommand`. When set, after running validation, apply all LLM artifact replacements to produce a cleaned document. For each `LlmArtifactMatch`, replace the matched text with its `replacement` value. If replacement is `[remove or rephrase]` or empty, comment the match for manual review (wrap in `<!-- LLM: original text -->` markers). Output the cleaned content to stdout. If `--json` is set, include `{ cleaned: string, replacements: number }` in the output. This flag is independent of `--strict` and `--engagement-report`.
+
+**DF-093**:
+> In `src/validators/profiles.ts`, add `llm-artifacts` to every profile's rule list at WARN severity. In `docflow publish`, after the existing gates (human review, unknowns, validation), run `scanLlmArtifacts` on the content and report an advisory: `Advisory: ${count} LLM artifact(s) detected. Consider running 'docflow validate --strip-llm' to review.`. This advisory does NOT block publishing — it is informational only.
+
+---
+
 ## 6. Requirements Traceability Matrix
 
 | Req ID | Category | Research | Validates Via | Depends On |
@@ -502,6 +528,10 @@ The validation rules and content structure are grounded in peer-reviewed researc
 | DF-083 | Publishing | — | Integration test | DF-022 |
 | DF-084 | Publishing | — | Integration test | — |
 | DF-085 | Publishing | — | Integration test | DF-028, DF-081 |
+| DF-090 | LLM Detection | RF-19 | Unit test | — |
+| DF-091 | LLM Detection | RF-19 | Fixture test | DF-090 |
+| DF-092 | LLM Detection | RF-19 | Integration test | DF-091 |
+| DF-093 | LLM Detection | RF-19 | Config test, Integration test | DF-091, DF-040P–043P |
 
 ---
 
@@ -509,8 +539,8 @@ The validation rules and content structure are grounded in peer-reviewed researc
 
 | Priority | Count | Categories |
 |---|---|---|
-| **P0 — Must have v1** | 52 | Core CLI, structure validation, cognitive load checks, engagement mechanics, readability, visual support, scoring, profiles, agent workflow, publishing |
-| **P1 — Should have v1** | 15 | Engagement report, transition validation, narrative arc, voice scoring, flow scoring, total score, agent role definitions, unknown acknowledgment |
+| **P0 — Must have v1** | 55 | Core CLI, structure validation, cognitive load checks, engagement mechanics, readability, visual support, scoring, profiles, agent workflow, publishing, LLM artifact detection |
+| **P1 — Should have v1** | 16 | Engagement report, transition validation, narrative arc, voice scoring, flow scoring, total score, agent role definitions, unknown acknowledgment, LLM artifact stripping |
 | **P2 — Future** | 1 | Topic sentence validation (NLP-heavy) |
 
 ---

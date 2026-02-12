@@ -6,6 +6,7 @@ import { syllable } from 'syllable';
 import type { Heading, List, Paragraph, Code, Image, RootContent } from 'mdast';
 import { validateFrontMatter } from '../utils/front-matter.js';
 import { validateCrossReferences } from '../utils/cross-references.js';
+import { scanLlmArtifacts } from './llm-artifacts.js';
 import type { ValidationContext, Diagnostic } from './types.js';
 import { registerRule } from './registry.js';
 
@@ -837,9 +838,82 @@ registerRule('DF-054', (ctx: ValidationContext): Diagnostic[] => {
   return diagnostics;
 });
 
-// DF-055: Topic sentence (P2 — stub)
-registerRule('DF-055', (_ctx: ValidationContext): Diagnostic[] => {
-  return [];
+// DF-055: Topic sentence frontloading
+const STOPWORDS = new Set([
+  'a', 'about', 'above', 'after', 'again', 'against', 'all', 'also', 'am', 'an',
+  'and', 'any', 'are', 'as', 'at', 'be', 'because', 'been', 'before', 'being',
+  'below', 'between', 'both', 'but', 'by', 'can', 'could', 'did', 'do', 'does',
+  'doing', 'down', 'during', 'each', 'even', 'few', 'for', 'from', 'further',
+  'get', 'gets', 'got', 'had', 'has', 'have', 'having', 'he', 'her', 'here',
+  'hers', 'herself', 'him', 'himself', 'his', 'how', 'i', 'if', 'in', 'into',
+  'is', 'it', 'its', 'itself', 'just', 'like', 'may', 'me', 'might', 'more',
+  'most', 'must', 'my', 'myself', 'no', 'nor', 'not', 'now', 'of', 'off', 'on',
+  'once', 'only', 'or', 'other', 'our', 'ours', 'ourselves', 'out', 'over',
+  'own', 'same', 'shall', 'she', 'should', 'so', 'some', 'such', 'than', 'that',
+  'the', 'their', 'theirs', 'them', 'themselves', 'then', 'there', 'these',
+  'they', 'this', 'those', 'through', 'to', 'too', 'under', 'until', 'up', 'us',
+  'use', 'very', 'was', 'we', 'were', 'what', 'when', 'where', 'which', 'while',
+  'who', 'whom', 'why', 'will', 'with', 'would', 'you', 'your', 'yours',
+  'yourself', 'yourselves',
+]);
+
+function tokenize(text: string): string[] {
+  return text.toLowerCase().match(/[a-z]{2,}/g)?.filter((w) => !STOPWORDS.has(w)) ?? [];
+}
+
+registerRule('DF-055', (ctx: ValidationContext): Diagnostic[] => {
+  const diagnostics: Diagnostic[] = [];
+
+  visit(ctx.ast, 'paragraph', (node: Paragraph) => {
+    const text = toString(node);
+    const sentences = text.split(/(?<=[.!?])\s+/).filter((s) => s.length > 0);
+    if (sentences.length <= 1) return;
+
+    // Tokenize all sentences, count word frequency
+    const allTokens = tokenize(text);
+    if (allTokens.length === 0) return;
+
+    const freq = new Map<string, number>();
+    const firstOccurrence = new Map<string, number>();
+    for (let i = 0; i < allTokens.length; i++) {
+      const w = allTokens[i];
+      freq.set(w, (freq.get(w) ?? 0) + 1);
+      if (!firstOccurrence.has(w)) firstOccurrence.set(w, i);
+    }
+
+    // Find dominant keyword (highest freq, ties broken by first occurrence)
+    let dominant = '';
+    let maxFreq = 0;
+    let earliestPos = Infinity;
+    for (const [word, count] of freq) {
+      if (count > maxFreq || (count === maxFreq && (firstOccurrence.get(word) ?? 0) < earliestPos)) {
+        dominant = word;
+        maxFreq = count;
+        earliestPos = firstOccurrence.get(word) ?? 0;
+      }
+    }
+
+    if (!dominant || maxFreq < 2) return; // Need at least 2 occurrences to be "dominant"
+
+    // Check which sentence the dominant keyword first appears in
+    for (let s = 0; s < sentences.length; s++) {
+      const sentenceTokens = tokenize(sentences[s]);
+      if (sentenceTokens.includes(dominant)) {
+        if (s > 0) {
+          diagnostics.push({
+            ruleId: 'DF-055',
+            severity: 'WARN',
+            line: node.position?.start?.line ?? 0,
+            message: `Paragraph may not frontload its main point. The key topic "${dominant}" first appears in sentence ${s + 1}. Move it to the opening sentence for scanability.`,
+            research: 'RF-11',
+          });
+        }
+        break;
+      }
+    }
+  });
+
+  return diagnostics;
 });
 
 // ---------------------------------------------------------------------------
@@ -995,4 +1069,19 @@ registerRule('DF-059', (ctx: ValidationContext): Diagnostic[] => {
   });
 
   return diagnostics;
+});
+
+// ---------------------------------------------------------------------------
+// LLM Artifact Detection (DF-091)
+// ---------------------------------------------------------------------------
+
+registerRule('DF-091', (ctx: ValidationContext): Diagnostic[] => {
+  const matches = scanLlmArtifacts(ctx.rawContent);
+  return matches.map((m) => ({
+    ruleId: 'DF-091',
+    severity: 'WARN' as const,
+    line: m.line,
+    message: m.message,
+    research: 'RF-19',
+  }));
 });

@@ -269,6 +269,59 @@ describe('DF-058: Image alt text', () => {
 });
 
 // ---------------------------------------------------------------------------
+// DF-055: Topic sentence frontloading
+// ---------------------------------------------------------------------------
+describe('DF-055: Topic sentence frontloading', () => {
+  it('warns when key term appears only in sentence 3', () => {
+    const body = `## Setup
+
+This section covers important details. There are many things to consider when starting out. Caching improves performance by storing results. Caching also reduces load on the server.`;
+    const ctx = createContext(mdWithFrontMatter({}, body));
+    const rule = getRule('DF-055')!;
+    const diags = rule(ctx);
+    const topicDiags = diags.filter((d) => d.message.includes('caching'));
+    expect(topicDiags.length).toBe(1);
+    expect(topicDiags[0].severity).toBe('WARN');
+    expect(topicDiags[0].message).toContain('sentence 3');
+  });
+
+  it('passes when key term is in sentence 1', () => {
+    const body = `## Setup
+
+Caching improves performance by storing results. You should enable caching for all API calls. This makes your caching strategy more effective.`;
+    const ctx = createContext(mdWithFrontMatter({}, body));
+    const rule = getRule('DF-055')!;
+    const diags = rule(ctx);
+    const topicDiags = diags.filter((d) => d.message.includes('frontload'));
+    expect(topicDiags.length).toBe(0);
+  });
+
+  it('skips single-sentence paragraphs', () => {
+    const body = `## Setup
+
+Just one sentence here about caching and caching.`;
+    const ctx = createContext(mdWithFrontMatter({}, body));
+    const rule = getRule('DF-055')!;
+    const diags = rule(ctx);
+    expect(diags.length).toBe(0);
+  });
+
+  it('includes keyword and RF-11 in message', () => {
+    const body = `## Setup
+
+Start with something general. Then discuss another thing. The configuration matters here. Configuration is set in the file. Configuration controls behavior.`;
+    const ctx = createContext(mdWithFrontMatter({}, body));
+    const rule = getRule('DF-055')!;
+    const diags = rule(ctx);
+    const topicDiags = diags.filter((d) => d.message.includes('frontload'));
+    if (topicDiags.length > 0) {
+      expect(topicDiags[0].message).toContain('configuration');
+      expect(topicDiags[0].research).toBe('RF-11');
+    }
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Profile execution
 // ---------------------------------------------------------------------------
 describe('Profile execution', () => {

@@ -30,105 +30,119 @@ Traces to: DF-003
 
 ### Requirement: List Published Documents
 
-The system SHALL provide a `docflow list --publish` command that scans `publish/*.md` and displays each document's ID, title, audience, and estimated reading time. Reading time SHALL be computed dynamically from word count at 200 wpm.
+The system SHALL provide a `docflow list --publish` command that scans `publish/*.md` and displays each document's ID, title, audience, and estimated reading time. Reading time SHALL be computed dynamically from word count (excluding code blocks and front matter) at 200 wpm.
 
 Traces to: DF-004, DF-021
 
-#### Scenario: List published documents
+#### Scenario: List published documents with --publish flag
 
 - **WHEN** `publish/` contains `auth-guide.md` and `setup-tutorial.md`
-- **THEN** `docflow list --publish` displays a table with id, title, audience, and reading time for each
+- **THEN** `docflow list --publish` displays a table with ID, Title, Audience, and Reading Time
+- **AND** reading time is computed from word count at 200 words per minute
 
 #### Scenario: Reading time computation
 
 - **WHEN** a published document contains 1000 words (excluding front matter and code blocks)
 - **THEN** reading time is displayed as "5 min"
 
+#### Scenario: List --publish with --json
+
+- **WHEN** the user runs `docflow list --publish --json`
+- **THEN** output is valid JSON: `{ "success": true, "documents": [...] }`
+- **AND** each document includes `id`, `title`, `audience`, and `readingTime` fields
+
+#### Scenario: List --publish with no published documents
+
+- **WHEN** `publish/` is empty
+- **THEN** `docflow list --publish` displays "No published documents found."
+
 ---
 
 ### Requirement: Show Document
 
-The system SHALL provide a `docflow show [item]` command that displays the contents of a draft (from `drafts/[slug]/content.md`) or published document (from `publish/[slug].md`). When showing a draft, the command SHALL also run the scoring engine and append an engagement score summary.
+The system SHALL provide a `docflow show [item]` command that displays the contents of a draft (from `drafts/[slug]/content.md`) or published document (from `publish/[slug].md`). When showing a draft, the command SHALL also run the scoring engine and append an engagement score summary showing all 5 dimensions (curiosity, clarity, action, flow, voice) plus the total score.
 
 Traces to: DF-005
 
-#### Scenario: Show a draft with scores
+#### Scenario: Show a draft with engagement scores
 
 - **WHEN** the user runs `docflow show auth-guide` and `drafts/auth-guide/content.md` exists
-- **THEN** the document content is displayed followed by an engagement score summary
+- **THEN** the document metadata is displayed followed by an engagement score summary
+- **AND** all 5 engagement dimensions (curiosity, clarity, action, flow, voice) are shown with numeric scores
 
-#### Scenario: Show a published document
+#### Scenario: Show a published document without scores
 
 - **WHEN** the user runs `docflow show auth-guide` and `publish/auth-guide.md` exists
-- **THEN** the document content is displayed
+- **THEN** the document metadata is displayed
+- **AND** no engagement scores are shown (published docs are finalized)
 
 #### Scenario: Show with --json
 
-- **WHEN** the user runs `docflow show auth-guide --json`
-- **THEN** output is valid JSON containing content and score data
+- **WHEN** the user runs `docflow show auth-guide --json` for a draft
+- **THEN** output is valid JSON containing metadata and engagement score data
 
 ---
 
 ### Requirement: Validate Command
 
-The system SHALL provide a `docflow validate [slug]` command that loads the validation profile matching the content type (or specified by `--profile`), runs all rules in the profile, and outputs diagnostics. Each diagnostic SHALL report `[PASS]`, `[WARN]`, or `[FAIL]` with file location, explanation, and research citation. Exit code SHALL be 0 if no FAIL results, 1 otherwise. The command SHALL support `--strict` (treat WARN as FAIL) and `--engagement-report` (detailed scoring breakdown).
+The `docflow validate [file]` command SHALL run the full validation suite against a document. It SHALL support `--strict` (treat warnings as errors), `--rule <ruleId>` (run specific rule), `--engagement-report` (include engagement scores), and `--strip-llm` (output cleaned document with LLM artifacts replaced). Human output SHALL group diagnostics by severity. JSON output SHALL include diagnostics array, pass/warn/fail counts, and optional engagement and cleaned-content fields.
 
-Traces to: DF-006, DF-007
+Traces to: DF-006, DF-007, DF-092
 
-#### Scenario: Validate a draft with failures
+#### Scenario: Validate with --strip-llm
 
-- **WHEN** the user runs `docflow validate setup-tutorial` and the draft has missing prerequisites
-- **THEN** the output includes a FAIL diagnostic for the missing section with line number and research citation
-- **AND** exit code is 1
+- **GIVEN** a file containing LLM artifacts like "delve" and em dashes
+- **WHEN** `docflow validate --strip-llm <file>` is run
+- **THEN** stdout contains the document with artifacts replaced by suggested alternatives
+- **AND** validation diagnostics are still shown
 
-#### Scenario: Validate with auto-detected profile
+#### Scenario: Validate --strip-llm --json
 
-- **WHEN** the content's front matter contains `type: tutorial`
-- **THEN** the tutorial validation profile is loaded automatically without `--profile`
-
-#### Scenario: Validate with --strict
-
-- **WHEN** the user runs `docflow validate auth-guide --strict` and there are WARN diagnostics
-- **THEN** WARN diagnostics are elevated to FAIL and exit code is 1
-
-#### Scenario: Validate with --engagement-report
-
-- **WHEN** the user runs `docflow validate auth-guide --engagement-report`
-- **THEN** output includes curiosity, clarity, action, flow, and voice scores with breakdowns
-
-#### Scenario: Validate with --json
-
-- **WHEN** the user runs `docflow validate auth-guide --json`
-- **THEN** output is valid JSON: `{ "success": boolean, "diagnostics": [...], "scores"?: {...} }`
-
----
+- **GIVEN** a file with LLM artifacts
+- **WHEN** `docflow validate --strip-llm --json <file>` is run
+- **THEN** output includes `cleaned` (cleaned content string) and `replacements` (count of applied replacements)
 
 ### Requirement: Publish Command
 
-The system SHALL provide a `docflow publish [slug]` command that promotes a validated draft to `publish/[slug].md`. Publishing SHALL enforce sequential gates: (1) draft exists, (2) `docflow validate --strict` passes, (3) human review is approved in `checklist.md`, (4) no unacknowledged agent unknowns, (5) copy `content.md` to `publish/[slug].md`, (6) resolve all `{{doc:slug}}` cross-references. Any gate failure aborts the operation. Published files MUST be flat — no subdirectories in `publish/`.
+The system SHALL provide a `docflow publish [slug]` command that promotes a validated draft to `publish/[slug].md`. Publishing SHALL enforce sequential gates: (1) draft exists, (2) `docflow validate --strict` passes with zero failures — validation is mandatory and cannot be skipped, (3) human review is approved in `checklist.md`, (4) no unacknowledged agent unknowns remain, (5) read `content.md` and resolve all `{{doc:slug}}` cross-references, (6) strip all `## Agent Contributions` sections from published output, (7) add `published_at` timestamp to front matter, (8) write clean self-contained file to `publish/[slug].md`. Any gate failure aborts the operation. Published files MUST be flat — no subdirectories in `publish/`. The `--skip-validation` and `--strict` flags SHALL be removed since strict validation is always mandatory.
 
 Traces to: DF-008, DF-029, DF-080, DF-081, DF-082, DF-083, DF-085
 
 #### Scenario: Successful publish
 
-- **WHEN** the draft passes validation, has human review approval, and no unresolved unknowns
-- **THEN** `publish/[slug].md` is created with resolved cross-references
+- **WHEN** the draft passes strict validation, has human review approval, and no unresolved unknowns
+- **THEN** `publish/[slug].md` is created with resolved cross-references, Agent Contributions stripped, and `published_at` timestamp
 - **AND** exit code is 0
 
 #### Scenario: Publish rejected — validation failure
 
 - **WHEN** `docflow validate [slug] --strict` returns FAIL results
-- **THEN** publish aborts with diagnostic output: "Cannot publish: validation failed."
+- **THEN** publish aborts with diagnostic output: "Cannot publish: validation failed. Fix the above issues and try again."
 
 #### Scenario: Publish rejected — no human review
 
-- **WHEN** `checklist.md` lacks a `## Human Review` section with `approved: true`
-- **THEN** publish aborts: "Human review required before publishing."
+- **WHEN** `checklist.md` lacks a `## Human Review` section or status is not `approved`
+- **THEN** publish aborts: "Human review required before publishing. Add a '## Human Review' section to checklist.md with 'Status: approved' after reviewing all content."
+
+#### Scenario: Publish rejected — human review rejected
+
+- **WHEN** `## Human Review` has `Status: rejected` or `Status: needs-revision`
+- **THEN** publish aborts: "Human review status is '[status]'. Cannot publish."
 
 #### Scenario: Publish rejected — unresolved unknowns
 
-- **WHEN** `## Agent Contributions` → `### Unknowns` is non-empty and human review does not acknowledge unknowns
-- **THEN** publish aborts with error
+- **WHEN** any draft artifact has non-empty content under `## Agent Contributions` → `### Unknowns` and Human Review does not contain `acknowledged_unknowns: true`
+- **THEN** publish aborts: "Agent-flagged unknowns remain unresolved. Either resolve them or add 'acknowledged_unknowns: true' to the Human Review section after reviewing."
+
+#### Scenario: Publish with acknowledged unknowns
+
+- **WHEN** `### Unknowns` has content but Human Review contains `acknowledged_unknowns: true`
+- **THEN** publish proceeds normally
+
+#### Scenario: Agent Contributions stripped from output
+
+- **WHEN** publish succeeds
+- **THEN** the published file does NOT contain `## Agent Contributions` or any of its subsections (`### Role`, `### Assumptions`, `### Unknowns`)
 
 #### Scenario: Publish rejected — nested slug
 
@@ -149,7 +163,7 @@ Traces to: DF-008, DF-029, DF-080, DF-081, DF-082, DF-083, DF-085
 
 ### Requirement: Archive Command
 
-The system SHALL provide a `docflow archive [slug]` command that moves a published file from `publish/[slug].md` to `archive/YYYY-MM-DD-[slug].md` using the current date. If `drafts/[slug]/` still exists, it SHALL also be moved to `archive/YYYY-MM-DD-[slug]/`. The command SHALL support `--yes` to skip confirmation prompt.
+The system SHALL provide a `docflow archive [slug]` command that moves a published file from `publish/[slug].md` to `archive/YYYY-MM-DD-[slug].md` using the current date. If `drafts/[slug]/` still exists, it SHALL also be moved to `archive/YYYY-MM-DD-[slug]/`. The command SHALL add `archived_at` timestamp and optional `archive_reason` to front matter. The command SHALL support `--reason <reason>` to record why the document was archived.
 
 Traces to: DF-009, DF-084
 
@@ -157,29 +171,29 @@ Traces to: DF-009, DF-084
 
 - **WHEN** the user runs `docflow archive auth-guide`
 - **THEN** `publish/auth-guide.md` is moved to `archive/2026-02-11-auth-guide.md`
-- **AND** the user is prompted for confirmation (unless `--yes`)
+- **AND** `archived_at` timestamp is added to front matter
 
 #### Scenario: Archive with draft cleanup
 
 - **WHEN** `drafts/auth-guide/` exists alongside `publish/auth-guide.md`
-- **THEN** both are moved to `archive/` with date prefix
+- **THEN** `publish/auth-guide.md` is moved to `archive/2026-02-11-auth-guide.md`
+- **AND** `drafts/auth-guide/` is moved to `archive/2026-02-11-auth-guide/`
+
+#### Scenario: Archive with reason
+
+- **WHEN** the user runs `docflow archive auth-guide --reason "superseded by v2"`
+- **THEN** the archived file's front matter includes `archive_reason: "superseded by v2"`
 
 #### Scenario: Archive nonexistent document
 
 - **WHEN** `publish/auth-guide.md` does not exist
 - **THEN** the command fails with "No published document found: auth-guide"
-
-#### Scenario: Archive with --yes
-
-- **WHEN** the user runs `docflow archive auth-guide --yes`
-- **THEN** no confirmation prompt is shown
+- **AND** exit code is 1
 
 #### Scenario: Archive with --json
 
 - **WHEN** the user runs `docflow archive auth-guide --json`
-- **THEN** output is valid JSON: `{ "success": true, "archived": [...] }`
-
----
+- **THEN** output is valid JSON: `{ "success": true, "archived": ["archive/2026-02-11-auth-guide.md"] }`
 
 ### Requirement: Metrics Command
 

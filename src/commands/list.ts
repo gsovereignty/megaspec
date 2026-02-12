@@ -3,8 +3,12 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import matter from 'gray-matter';
 import { output, outputError, type OutputContext } from '../utils/output-context.js';
+import { parseMarkdown, countWords } from '../utils/markdown.js';
+import { computeEngagementScore, type ScoringContext } from '../scoring/engagement.js';
+import type { ContentType } from '../utils/front-matter.js';
 
 interface DocumentInfo {
+  id: string;
   slug: string;
   title: string;
   type: string;
@@ -37,6 +41,7 @@ function findDocuments(projectDir: string): DocumentInfo[] {
           const raw = fs.readFileSync(contentPath, 'utf-8');
           const { data } = matter(raw);
           docs.push({
+            id: (data.id as string) || entry.name,
             slug: entry.name,
             title: (data.title as string) || entry.name,
             type: (data.type as string) || 'unknown',
@@ -46,6 +51,7 @@ function findDocuments(projectDir: string): DocumentInfo[] {
           });
         } catch {
           docs.push({
+            id: entry.name,
             slug: entry.name,
             title: entry.name,
             type: 'unknown',
@@ -67,6 +73,7 @@ function findDocuments(projectDir: string): DocumentInfo[] {
           const raw = fs.readFileSync(filePath, 'utf-8');
           const { data } = matter(raw);
           docs.push({
+            id: (data.id as string) || slug,
             slug,
             title: (data.title as string) || slug,
             type: (data.type as string) || 'unknown',
@@ -76,6 +83,7 @@ function findDocuments(projectDir: string): DocumentInfo[] {
           });
         } catch {
           docs.push({
+            id: slug,
             slug,
             title: slug,
             type: 'unknown',
@@ -100,17 +108,52 @@ export function registerListCommand(
     .description('List all documents in the project')
     .option('-t, --type <type>', 'Filter by content type')
     .option('-l, --location <location>', 'Filter by location (drafts, publish, archive)')
+    .option('-p, --publish', 'Show published documents with ID, title, audience, and reading time')
     .action((opts) => {
       const ctx = getCtx();
       const projectDir = process.cwd();
 
       let docs = findDocuments(projectDir);
 
-      if (opts.type) {
-        docs = docs.filter((d) => d.type === opts.type);
+      if (opts.publish) {
+        docs = docs.filter((d) => d.location === 'publish');
+      } else {
+        if (opts.type) {
+          docs = docs.filter((d) => d.type === opts.type);
+        }
+        if (opts.location) {
+          docs = docs.filter((d) => d.location === opts.location);
+        }
       }
-      if (opts.location) {
-        docs = docs.filter((d) => d.location === opts.location);
+
+      if (opts.publish) {
+        // Compute reading time for each document
+        const publishDocs = docs.map((d) => {
+          const raw = fs.readFileSync(d.path, 'utf-8');
+          const wc = countWords(raw);
+          const readingTime = Math.ceil(wc / 200);
+          return { ...d, readingTime };
+        });
+
+        if (ctx.json) {
+          output(ctx, '', { success: true, documents: publishDocs, count: publishDocs.length });
+          return;
+        }
+
+        if (publishDocs.length === 0) {
+          output(ctx, 'No published documents found.', { documents: [], count: 0 });
+          return;
+        }
+
+        const header = `${'ID'.padEnd(20)} ${'TITLE'.padEnd(30)} ${'AUDIENCE'.padEnd(14)} ${'READING TIME'.padEnd(12)}`;
+        const separator = '-'.repeat(header.length);
+        const rows = publishDocs.map(
+          (d) =>
+            `${d.id.padEnd(20)} ${d.title.padEnd(30)} ${d.audience.padEnd(14)} ${`~${d.readingTime} min`.padEnd(12)}`,
+        );
+
+        output(ctx, [header, separator, ...rows].join('\n'), { documents: publishDocs, count: publishDocs.length });
+        return;
       }
 
       if (ctx.json) {
@@ -170,6 +213,23 @@ export function registerShowCommand(
         }
       }
 
+      // Compute engagement scores for drafts
+      let engagement: { total: number; dimensions: Record<string, { score: number; label: string; details: string }> } | undefined;
+      if (doc.location === 'drafts') {
+        try {
+          const parsed = parseMarkdown(raw);
+          const contentType = (parsed.frontMatter.type as ContentType) || 'guide';
+          const scoringCtx: ScoringContext = {
+            ast: parsed.ast,
+            content: parsed.content,
+            contentType,
+          };
+          engagement = computeEngagementScore(scoringCtx);
+        } catch {
+          // Skip scoring on error
+        }
+      }
+
       const info = {
         slug: doc.slug,
         title: doc.title,
@@ -181,6 +241,7 @@ export function registerShowCommand(
         frontMatter: data,
         artifacts,
         path: doc.path,
+        ...(engagement ? { engagement } : {}),
       };
 
       if (ctx.json) {
@@ -199,6 +260,14 @@ export function registerShowCommand(
       ];
       if (artifacts.length > 0) {
         lines.push(`Artifacts:   ${artifacts.join(', ')}`);
+      }
+      if (engagement) {
+        lines.push('');
+        lines.push('Engagement:');
+        for (const [, dim] of Object.entries(engagement.dimensions)) {
+          lines.push(`  ${dim.label.padEnd(12)} ${dim.score}/100`);
+        }
+        lines.push(`  ${'Total'.padEnd(12)} ${engagement.total}/100`);
       }
       output(ctx, lines.join('\n'), info);
     });
