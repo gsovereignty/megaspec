@@ -1,17 +1,21 @@
 # DocFlow — Product Requirements Document
 
-**Version**: 1.0
-**Date**: 2026-02-10
-**Status**: Draft
+**Version**: 1.1
+**Date**: 2026-02-12
+**Status**: Active
 **Author**: Gareth + AI Agents
 
 ---
 
 ## 1. Executive Summary
 
-DocFlow is a CLI-first tool that enables subject matter experts (SMEs) — who are not professional writers — to produce engaging, addictive documentation, whitepapers, tutorials, and technical articles. It combines LLM agent workflows with automated validation rules derived from classical rhetoric, cognitive science, and modern UX research. The final output is a set of audience-ready master Markdown files in a flat `publish/` folder.
+DocFlow is a CLI-first tool that enables subject matter experts (SMEs) — who are not professional writers — to produce engaging, addictive documentation, whitepapers, tutorials, and technical articles. It combines file-based AI agent instructions with automated validation rules derived from classical rhetoric, cognitive science, and modern UX research. The final output is a set of audience-ready master Markdown files in a flat `publish/` folder.
 
 DocFlow is independent from OpenSpec but lives alongside it in the megaspec repository and follows similar structural patterns (three-stage workflow, delta-based changes, structured validation).
+
+### Agent Architecture
+
+DocFlow uses a **file-based agent approach** — it generates instruction files (like `docflow/AGENTS.md`) that AI coding assistants read and follow, similar to how OpenSpec uses `openspec/AGENTS.md`. There are no API keys, no LLM SDK integration, and no built-in model calls. The AI assistant reading the project files **is** the agent. DocFlow's job is to generate the right instructions and validate the output.
 
 ## 2. Problem Statement
 
@@ -21,7 +25,7 @@ Current approaches fail because:
 - **Style guides** tell writers *what* to do but don't enforce it
 - **Professional writers** create a bottleneck and may lack domain depth
 - **AI writing tools** produce generic output without systematic engagement validation
-- **No tool** combines research-backed engagement mechanics with structured authoring workflow
+- **No tool** combines research-backed engagement mechanics with structured authoring workflow and file-based agent instructions
 
 ## 3. Target User
 
@@ -109,7 +113,7 @@ The validation rules and content structure are grounded in peer-reviewed researc
 > Add `--engagement-report` flag to `docflow validate`. When set, compute and output: curiosity score, clarity score, action score, flow score, voice score (see DF-060 through DF-064). Display as a summary table with numeric scores and descriptive labels (e.g., "Curiosity: 7/10 — Strong opening hook, 2 information gaps detected").
 
 **DF-008**:
-> Implement `docflow publish [slug]`. Steps: (1) Verify `drafts/[slug]/` exists. (2) Run `docflow validate [slug] --strict`; abort if failures. (3) Check that human review gate is satisfied (see DF-080). (4) Copy `drafts/[slug]/content.md` to `publish/[slug].md`. (5) Resolve all `{{doc:*}}` cross-references (see DF-070). (6) Output confirmation with published file path.
+> Implement `docflow publish [slug]`. Steps: (1) Verify `drafts/[slug]/` exists with `content.md`. (2) Run `docflow validate --strict` on the content; abort if failures. (3) Check that human review gate is satisfied (see DF-080). (4) Check for unacknowledged agent unknowns (see DF-085). (5) Read `content.md`, resolve all `{{doc:slug}}` cross-references (see DF-022). (6) Strip `## Agent Contributions` sections (internal metadata). (7) Add `published_at` timestamp to front matter. (8) Write clean file to `publish/[slug].md`. (9) Run LLM artifact advisory scan (see DF-093). (10) Output confirmation with published file path.
 
 **DF-009**:
 > Implement `docflow archive [slug]`. Steps: (1) Verify `publish/[slug].md` exists. (2) Move file to `archive/YYYY-MM-DD-[slug].md` using current date. (3) If `drafts/[slug]/` still exists, move to `archive/YYYY-MM-DD-[slug]/` as well. (4) Output confirmation. Support `--yes` flag to skip confirmation prompt.
@@ -258,7 +262,7 @@ The validation rules and content structure are grounded in peer-reviewed researc
 | DF-052 | The system SHALL WARN when passive voice exceeds 20% of total sentences. | P0 | RF-17 | Write 10 sentences, 4 passive; validate; confirm WARN. |
 | DF-053 | The system SHALL WARN when the ratio of "you" pronouns to system-focused subjects ("the API", "the system", "the tool", "the library") is below 1:2. | P1 | RF-17 | Write content with 2 "you" and 10 "the system"; validate; confirm WARN. |
 | DF-054 | The system SHALL WARN when headings are non-descriptive (matching a blocklist: "Overview", "Details", "Miscellaneous", "Notes", "General", "Introduction" without qualifier). | P1 | RF-11 | Use heading "## Overview"; validate; confirm WARN. Use "## Authentication Overview"; passes. |
-| DF-055 | The system SHALL validate that the first sentence of each paragraph contains the main point (topic sentence test) by checking it introduces the paragraph's dominant keyword/concept. | P2 | RF-11 | Paragraph whose key term appears only in sentence 3; validate; confirm WARN. |
+| DF-055 | The system SHALL validate that the first sentence of each paragraph contains the main point (topic sentence test) by checking it introduces the paragraph's dominant keyword/concept. | P1 | RF-11 | Paragraph whose key term appears only in sentence 3; validate; confirm WARN. |
 
 #### OpenSpec Prompts — Readability
 
@@ -311,32 +315,32 @@ The validation rules and content structure are grounded in peer-reviewed researc
 
 | ID | Requirement | Priority | Research | Verification |
 |---|---|---|---|---|
-| DF-060 | The system SHALL compute a **Curiosity Score** (0-10) based on: count of information gaps, opening hooks, cliffhanger transitions, and question-based headings. | P0 | RF-04, RF-03 | Validate document with 0 hooks → score 0; add 3 hooks + 2 questions → score increases proportionally. |
-| DF-061 | The system SHALL compute a **Clarity Score** (0-10) based on: Flesch-Kincaid grade level, paragraph length compliance, list compliance, and heading descriptiveness. | P0 | RF-05, RF-11 | Validate dense document → low score; simplify → score increases. |
-| DF-062 | The system SHALL compute an **Action Score** (0-10) based on: count of runnable code examples, exercises, next-steps sections, and concrete outcomes. | P0 | RF-06, RF-10 | Validate document with 0 examples → score 0; add 3 annotated examples → score increases. |
-| DF-063 | The system SHALL compute a **Flow Score** (0-10) based on: presence of section transitions, tension-release patterns, progressive disclosure compliance, and narrative arc. | P1 | RF-02, RF-07 | Validate document with abrupt section changes → low score; add transitions → score increases. |
-| DF-064 | The system SHALL compute a **Voice Score** (0-10) based on: active voice ratio, "you"-to-system ratio, conversational markers (contractions, questions), and personal pronoun usage. | P1 | RF-17, RF-01 | Validate formal passive document → low score; rewrite conversationally → score increases. |
-| DF-065 | The system SHALL compute a **Total Engagement Score** as a weighted average of the five dimension scores, with weights configurable in `project.md`. | P1 | All RF | Verify total score changes when weights are adjusted in config. |
+| DF-060 | The system SHALL compute a **Curiosity Score** (0-100) based on: count of information gaps, opening hooks, cliffhanger transitions, and question-based headings. | P0 | RF-04, RF-03 | Validate document with 0 hooks → low score; add 3 hooks + 2 questions → score increases proportionally. |
+| DF-061 | The system SHALL compute a **Clarity Score** (0-100) based on: Flesch-Kincaid grade level, sentence length compliance, and heading descriptiveness. | P0 | RF-05, RF-11 | Validate dense document → low score; simplify → score increases. |
+| DF-062 | The system SHALL compute an **Action Score** (0-100) based on: count of code examples, example headings, exercises, step indicators, and concrete outcomes. | P0 | RF-06, RF-10 | Validate document with 0 examples → low score; add 3 annotated examples → score increases. |
+| DF-063 | The system SHALL compute a **Flow Score** (0-100) based on: presence of section transitions, next-steps sections, and narrative arc signals (setup/resolution). | P0 | RF-02, RF-07 | Validate document with abrupt section changes → low score; add transitions → score increases. |
+| DF-064 | The system SHALL compute a **Voice Score** (0-100) based on: reader pronoun ratio (you vs system phrases), active voice indicators, and engaging tone markers (contractions, questions, informal markers). | P0 | RF-17, RF-01 | Validate formal passive document → low score; rewrite conversationally → score increases. |
+| DF-065 | The system SHALL compute a **Total Engagement Score** (0-100) as a weighted average of the five dimension scores. Default weights: Curiosity=0.25, Clarity=0.25, Action=0.20, Flow=0.15, Voice=0.15. | P0 | All RF | Verify total score is weighted average of 5 dimensions. |
 
 #### OpenSpec Prompts — Engagement Scoring
 
 **DF-060**:
-> Implement curiosity scoring engine. Components and weights: (1) Opening hook present: +3 points. (2) Information gaps (question posed before answer): +1 per gap, max +3. (3) Cliffhanger transitions between sections: +0.5 per, max +2. (4) Question-based headings: +0.5 per, max +2. Normalize to 0-10 scale. Return `{ score: number, breakdown: { hooks: number, gaps: number, cliffhangers: number, questionHeadings: number } }`.
+> Implement curiosity scoring engine. Score 0-100. Signals measured: question marks in content, opening hook detection ("you" + problem verb, question in first paragraph), information gap phrases ("how", "why", "what if"), and concrete statistics/numbers. Return `{ score: number, label: string, details: string }` per dimension.
 
 **DF-061**:
-> Implement clarity scoring engine. Components: (1) Flesch-Kincaid within target: +3 points (scale from 0 at +4 over target, to 3 at target or below). (2) Paragraph compliance (% of paragraphs ≤ 5 sentences): scale 0-3. (3) List compliance (% of lists with 3-7 items): scale 0-2. (4) Heading descriptiveness (% of headings passing blocklist check): scale 0-2. Return breakdown object.
+> Implement clarity scoring engine. Score 0-100. Signals measured: Flesch-Kincaid grade level (lower = better up to target), average sentence word count (shorter = better), heading descriptiveness (non-vague headings ratio). Return dimension score object.
 
 **DF-062**:
-> Implement action scoring engine. Components: (1) Code examples present: +1 per annotated example, max +4. (2) Exercises/practice sections: +2 per, max +4. (3) Next-steps section present: +1. (4) Concrete outcome statements ("you now have", "you can now"): +0.5 per, max +1. Return breakdown object.
+> Implement action scoring engine. Score 0-100. Signals measured: code block count, `#### Example:` heading count, exercise/practice section count, step indicators ("Step N"), and outcome statements. Return dimension score object.
 
 **DF-063**:
-> Implement flow scoring engine. Components: (1) Section transition phrases (% of H2 transitions with momentum phrases): scale 0-3. (2) Tension-release patterns (% of sections with problem-before-solution): scale 0-3. (3) Progressive disclosure (jargon/complexity increases through document, not clustered early): scale 0-2. (4) Narrative arc completeness (setup/confrontation/resolution): scale 0-2. Return breakdown object.
+> Implement flow scoring engine. Score 0-100. Signals measured: transition phrases between H2 sections ("next", "now that", "let's"), forward-linking sections ("next steps", "what's next"), and narrative arc markers (setup/resolution keywords). Return dimension score object.
 
 **DF-064**:
-> Implement voice scoring engine. Components: (1) Active voice ratio (scale: 0 at ≤60%, 3 at ≥80%): max +3. (2) Reader pronoun ratio (you:system, scale: 0 at ≤1:4, 3 at ≥1:1): max +3. (3) Contractions present (natural tone): +1 if any contractions used. (4) Questions in prose (direct engagement): +0.5 per question, max +2. (5) Informal markers ("let's", "we'll", "here's"): +0.5 per unique, max +1. Return breakdown object.
+> Implement voice scoring engine. Score 0-100. Signals measured: reader pronouns ("you", "your") vs system phrases ("the API", "the system"), active voice indicators (absence of "is/was/were + past participle"), engaging tone markers (contractions, questions, informal phrases like "let's", "here's"). Return dimension score object.
 
 **DF-065**:
-> Implement total engagement score calculator. Default weights: Curiosity=0.25, Clarity=0.25, Action=0.20, Flow=0.15, Voice=0.15. Read custom weights from `project.md` YAML block or `docflow.yaml` under key `scoring.weights`. Compute `totalScore = sum(score[i] * weight[i])`. Display in `docflow show` and `docflow metrics` output. Return `{ total: number, dimensions: { curiosity: number, clarity: number, action: number, flow: number, voice: number }, weights: object }`.
+> Implement total engagement score calculator. Compute `totalScore = sum(dimensionScore[i] * weight[i])` with default weights: Curiosity=0.25, Clarity=0.25, Action=0.20, Flow=0.15, Voice=0.15. Return `{ total: number, dimensions: { curiosity: DimensionScore, clarity: DimensionScore, action: DimensionScore, flow: DimensionScore, voice: DimensionScore } }`. Display in `docflow show` (drafts only), `docflow metrics`, and `docflow validate --engagement-report`.
 
 ---
 
@@ -367,34 +371,36 @@ The validation rules and content structure are grounded in peer-reviewed researc
 
 ### 5.9 Agent Workflow
 
+DocFlow uses a **file-based agent architecture**: `docflow init` generates a `docflow/AGENTS.md` instruction file that AI coding assistants read and follow when helping SMEs write documentation. There are no API keys, no LLM SDK integration, and no programmatic agent orchestration. The AI assistant in the user's editor **is** the agent — DocFlow generates the instructions and validates the output.
+
 | ID | Requirement | Priority | Research | Verification |
 |---|---|---|---|---|
-| DF-070 | The system SHALL support an **interview mode** where the agent asks the SME structured questions derived from the `outline.md` template and generates draft content from the answers. | P0 | RF-10 | Start interview for a tutorial; verify agent asks about learning outcomes, examples, audience knowledge. |
-| DF-071 | The system SHALL support a **transform mode** where the SME provides raw notes, bullet points, or rough text, and the agent transforms it into engagement-validated content. | P0 | — | Provide raw bullets; verify agent produces structured content with hooks, examples, and transitions. |
-| DF-072 | The system SHALL support configurable agent modes per project: single, role-based (researcher/writer/reviewer), and consensus. | P0 | — | Set mode to "role-based" in project config; verify agents hand off correctly. |
-| DF-073 | Agent outputs SHALL populate all four draft artifacts (`outline.md`, `research.md`, `content.md`, `checklist.md`) with proper `## Agent Contributions` sections. | P0 | — | Run agent workflow; verify all 4 files created with Agent Contributions sections. |
-| DF-074 | The system SHALL define agent instructions in `docflow/AGENTS.md` that encode the engagement research (Aristotle, Loewenstein, Sweller, Gagné, Nielsen, etc.) as actionable writing guidance. | P0 | All RF | Review AGENTS.md; verify it contains operational instructions for each research principle, not just citations. |
-| DF-075 | The system SHALL provide agent role definitions with explicit handoff format: what each role receives as input, what it produces as output, and what metadata it must include. | P1 | — | Review role definitions; verify input/output contracts are explicit for researcher, writer, reviewer. |
+| DF-070 | The `docflow/AGENTS.md` file SHALL include **interview mode** instructions that tell the AI assistant to ask the SME structured questions derived from the content type template, then generate draft artifacts from the answers. | P0 | RF-10 | Read AGENTS.md interview section; verify it lists the 7 required questions and instructs the agent to generate outline.md, content.md, and checklist.md from answers. |
+| DF-071 | The `docflow/AGENTS.md` file SHALL include **transform mode** instructions that tell the AI assistant to accept raw SME input (notes, bullets, rough text) and restructure it into engagement-validated content while preserving all factual claims. | P0 | — | Read AGENTS.md transform section; verify it instructs the agent to analyze gaps, generate outline.md, transform content.md, and flag uncertain transformations. |
+| DF-072 | The `docflow init` command SHALL scaffold agent mode configuration in `project.md` with schema: `agents: { mode: 'single' \| 'role-based' \| 'consensus', interaction: 'interview' \| 'transform', roles: { researcher, writer, reviewer }, human_review: 'required' \| 'optional' }`. The `docflow/AGENTS.md` file SHALL document when each mode is appropriate. | P0 | — | Run `docflow init`; verify `project.md` contains agent config YAML block with correct defaults. Read AGENTS.md; verify mode guidance. |
+| DF-073 | The `docflow/AGENTS.md` file SHALL instruct agents to populate all four draft artifacts (`outline.md`, `research.md`, `content.md`, `checklist.md`) with `## Agent Contributions` sections including `### Role`, `### Assumptions`, and `### Unknowns`. Validation rule DF-028 enforces presence. | P0 | — | Read AGENTS.md; verify it instructs agents to include Agent Contributions. Create content without the section; validate; confirm FAIL from DF-028. |
+| DF-074 | The `docflow init` command SHALL generate `docflow/AGENTS.md` encoding the engagement research (RF-01 through RF-19) as actionable writing instructions — not academic citations, but operational guidance (e.g., "pose a specific question before explaining the concept"). | P0 | All RF | Run `docflow init`; verify `docflow/AGENTS.md` exists. Review content; verify each research foundation has operational instructions with good/bad examples. |
+| DF-075 | The `docflow/AGENTS.md` file SHALL define explicit role contracts for researcher, writer, and reviewer: what each role receives as input, what it produces as output, and what metadata it must include in `## Agent Contributions`. | P1 | — | Read AGENTS.md role contracts; verify input/output/metadata contracts for all 3 roles. |
 
 #### OpenSpec Prompts — Agent Workflow
 
 **DF-070**:
-> Implement interview mode AGENTS.md instructions. The agent MUST: (1) Read the content type template to determine required sections. (2) Ask the SME questions in this order: "Who is the target reader?", "What should they be able to do after reading?", "What do they already know?", "What's the core problem this solves?", "Walk me through the main steps/concepts", "What mistakes do people commonly make?", "What's the surprising insight or key takeaway?". (3) Generate `outline.md` from answers. (4) Draft `content.md` following the outline, applying engagement rules from this AGENTS.md. (5) Generate `checklist.md` mapped to Gagné's 9 events. (6) Document all assumptions in Agent Contributions sections.
+> Write the interview mode section of `docflow/AGENTS.md`. This section instructs the AI assistant to: (1) Read the content type template from `templates/` to determine required sections. (2) Ask the SME these questions in order: "Who is the target reader?", "What should they be able to do after reading?", "What do they already know?", "What's the core problem this solves?", "Walk me through the main steps/concepts", "What mistakes do people commonly make?", "What's the surprising insight or key takeaway?". (3) Generate `outline.md` from answers using the engagement strategy structure. (4) Draft `content.md` following the outline, applying engagement rules from AGENTS.md. (5) Generate `checklist.md` mapped to Gagné's 9 events. (6) Document all assumptions in `## Agent Contributions` sections of each file. The instructions must be concrete and actionable — tell the assistant exactly what to do, not just what concepts to apply.
 
 **DF-071**:
-> Implement transform mode AGENTS.md instructions. The agent MUST: (1) Receive raw input from SME (notes, bullets, rough draft). (2) Analyze for: missing hooks, absent examples, passive voice, cognitive load violations, missing structure. (3) Generate `outline.md` that structures the raw input into proper engagement-validated format. (4) Transform raw content into `content.md` applying: opening hook, tension-release per section, concrete examples, reader-centric voice, progressive disclosure. (5) Preserve all of the SME's factual content — never hallucinate domain claims. (6) Flag uncertain transformations in Agent Contributions.
+> Write the transform mode section of `docflow/AGENTS.md`. This section instructs the AI assistant to: (1) Accept raw input from the SME (notes, bullets, rough draft, brain dump). (2) Analyze the input for gaps: missing hooks, absent examples, passive voice, cognitive load issues, missing structure. (3) Generate `outline.md` that maps the raw input to the engagement-validated structure. (4) Transform raw content into `content.md` applying: opening hook, tension-release per section, concrete examples, reader-centric voice, progressive disclosure. (5) **Never hallucinate domain claims** — preserve all of the SME's factual content exactly. When the agent is unsure about a claim, it must flag it in `### Unknowns`. (6) Flag all uncertain transformations in `## Agent Contributions`.
 
 **DF-072**:
-> Implement agent mode configuration in `project.md` or `docflow.yaml`. Schema: `agents: { mode: 'single' | 'role-based' | 'consensus', interaction: 'interview' | 'transform', roles: { researcher: boolean, writer: boolean, reviewer: boolean }, human_review: 'required' | 'optional' }`. In AGENTS.md, document when each mode is appropriate: single (simple docs), role-based (complex whitepapers), consensus (high-stakes content). Default: `{ mode: 'single', interaction: 'interview', human_review: 'required' }`.
+> Ensure `docflow init` scaffolds the agent configuration block in `project.md`. The YAML block under `## Configuration` must include: `agents: { mode: 'single' | 'role-based' | 'consensus', interaction: 'interview' | 'transform', roles: { researcher: true, writer: true, reviewer: true }, human_review: 'required' }`. In `docflow/AGENTS.md`, include a section explaining when each mode is appropriate: **single** (simple docs, one agent does everything), **role-based** (complex whitepapers, agents hand off between researcher → writer → reviewer), **consensus** (high-stakes content, multiple agents review and reach agreement).
 
 **DF-073**:
-> All agent-produced artifacts MUST include `## Agent Contributions` at the end with: `### Role` (which agent/mode produced this), `### Model` (LLM model used, if known), `### Assumptions` (bulleted list of assumptions made during generation), `### Unknowns` (bulleted list of items that need SME verification), `### Confidence` (self-assessed confidence: high/medium/low with explanation). Validation (DF-028) enforces presence of this section.
+> Write the Agent Contributions section of `docflow/AGENTS.md` that instructs agents on the required metadata format. Every agent-produced artifact MUST include at the end: `## Agent Contributions` with subsections: `### Role` (which agent mode produced this — e.g., "Writer in single mode"), `### Assumptions` (bulleted list of assumptions made during generation), `### Unknowns` (bulleted list of items needing SME verification — use "None" if empty). The existing validation rule DF-028 enforces structural presence. The AGENTS.md instructions ensure content quality.
 
 **DF-074**:
-> Write `docflow/AGENTS.md` encoding research as operational instructions. Structure: (1) Quick reference checklist of engagement rules. (2) Per content type: which rules apply, with examples of good/bad output. (3) Writing guidance derived from each research source — not "use information gaps" but "pose a specific question in the opening paragraph before explaining the concept." (4) Common mistakes to avoid (generic examples, passive voice, answer-before-question). (5) Self-validation: before completing, the agent MUST run through each applicable rule mentally and verify compliance.
+> Generate `docflow/AGENTS.md` as part of `docflow init`. This is the core deliverable — a comprehensive instruction file that any AI coding assistant can read to help SMEs write documentation. Structure: (1) **Quick Reference Checklist** — bullet list of engagement rules the agent must follow. (2) **Per Content Type Rules** — for each type (tutorial, guide, reference, whitepaper), list which rules apply with concrete good/bad output examples. (3) **Research-Based Writing Guidance** — one section per research foundation (RF-01 through RF-19) with operational instructions (not "use information gaps" but "pose a specific question in the opening paragraph before explaining the concept"). (4) **Common Mistakes** — list of patterns to avoid (generic examples, passive voice, answer-before-question, LLM-style vocabulary). (5) **Self-Validation Checklist** — before completing any artifact, the agent must mentally run through each applicable rule and verify compliance. (6) **Interview Mode Instructions** (DF-070). (7) **Transform Mode Instructions** (DF-071). (8) **Role Contracts** (DF-075). (9) **Agent Contributions Format** (DF-073).
 
 **DF-075**:
-> Define role contracts in AGENTS.md. **Researcher**: receives outline.md, produces research.md (sources, evidence, competitive analysis). Input: outline + SME topic. Output: research.md with Sources, Evidence, Assumptions sections. **Writer**: receives outline.md + research.md, produces content.md. Input: outline + research. Output: engagement-validated content.md. **Reviewer**: receives all artifacts, produces review comments. Input: all 4 artifacts. Output: inline comments, engagement score assessment, list of violations. Each role MUST document handoff in Agent Contributions: "Received [files] from [role], produced [file]."
+> Write role contracts in `docflow/AGENTS.md`. **Researcher**: receives `outline.md` + SME topic → produces `research.md` with Sources, Evidence, Assumptions/Unknowns sections. **Writer**: receives `outline.md` + `research.md` → produces `content.md` following engagement rules. **Reviewer**: receives all 4 artifacts → produces review comments with engagement score assessment and list of violations. Each role MUST document handoff in `## Agent Contributions`: "Received [files] from [role], produced [file]."
 
 ---
 
@@ -516,12 +522,12 @@ The validation rules and content structure are grounded in peer-reviewed researc
 | DF-041P | Profile | RF-11, RF-12 | Config test | DF-006 |
 | DF-042P | Profile | RF-04, RF-06, RF-08 | Config test | DF-006 |
 | DF-043P | Profile | RF-01, RF-14 | Config test | DF-006 |
-| DF-070 | Agent | RF-10 | Agent test | DF-024, DF-074 |
-| DF-071 | Agent | — | Agent test | DF-024, DF-074 |
-| DF-072 | Agent | — | Config test | DF-074 |
-| DF-073 | Agent | — | Unit test | DF-028 |
-| DF-074 | Agent | All RF | Review | — |
-| DF-075 | Agent | — | Review | DF-074 |
+| DF-070 | Agent | RF-10 | File content review | DF-024, DF-074 |
+| DF-071 | Agent | — | File content review | DF-024, DF-074 |
+| DF-072 | Agent | — | Config test, File check | DF-074 |
+| DF-073 | Agent | — | File content review | DF-028, DF-074 |
+| DF-074 | Agent | All RF | Integration test | DF-001 |
+| DF-075 | Agent | — | File content review | DF-074 |
 | DF-080 | Publishing | — | Integration test | DF-081 |
 | DF-081 | Publishing | — | Unit test | — |
 | DF-082 | Publishing | — | Integration test | DF-006 |
@@ -539,9 +545,9 @@ The validation rules and content structure are grounded in peer-reviewed researc
 
 | Priority | Count | Categories |
 |---|---|---|
-| **P0 — Must have v1** | 55 | Core CLI, structure validation, cognitive load checks, engagement mechanics, readability, visual support, scoring, profiles, agent workflow, publishing, LLM artifact detection |
-| **P1 — Should have v1** | 16 | Engagement report, transition validation, narrative arc, voice scoring, flow scoring, total score, agent role definitions, unknown acknowledgment, LLM artifact stripping |
-| **P2 — Future** | 1 | Topic sentence validation (NLP-heavy) |
+| **P0 — Must have v1** | 56 | Core CLI, structure validation, cognitive load checks, engagement mechanics, readability, visual support, scoring, profiles, agent workflow, publishing, LLM artifact detection |
+| **P1 — Should have v1** | 16 | Engagement report, transition validation, narrative arc, agent role definitions, unknown acknowledgment, LLM artifact stripping, topic sentence validation |
+| **P2 — Future** | 0 | — |
 
 ---
 
@@ -560,8 +566,8 @@ The validation rules and content structure are grounded in peer-reviewed researc
 
 ## 9. Success Criteria
 
-1. An SME with no writing training can produce a document scoring ≥7/10 engagement using DocFlow's agent workflow
-2. All 52 P0 requirements pass automated validation
+1. An SME with no writing training can produce a document scoring ≥70/100 engagement using DocFlow's agent workflow
+2. All 56 P0 requirements pass automated validation
 3. `docflow validate --strict` catches ≥90% of cognitive load, engagement, and readability issues in test fixtures
 4. Full draft → publish workflow completes in under 30 minutes for a standard tutorial (excluding SME interview time)
 5. Agent-produced content is indistinguishable from professional technical writing in blind review
