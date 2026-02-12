@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as os from 'node:os';
-import { execSync } from 'node:child_process';
+import { execSync, spawn } from 'node:child_process';
 
 let tmpDir: string;
 const CLI = path.resolve('dist/cli.js');
@@ -464,5 +464,102 @@ describe('docflow metrics', () => {
   it('errors on missing file', () => {
     const { exitCode } = run('metrics /nonexistent.md');
     expect(exitCode).toBe(1);
+  });
+});
+
+describe('docflow validate --watch', () => {
+  it('--watch flag is accepted', () => {
+    const filePath = path.join(tmpDir, 'test.md');
+    fs.writeFileSync(filePath, validDoc, 'utf-8');
+    // Start watch mode and kill it immediately — just verify the flag is accepted
+    const child = spawn('node', [CLI, 'validate', '--watch', filePath], {
+      cwd: tmpDir,
+      env: { ...process.env, NO_COLOR: '1' },
+    });
+    return new Promise<void>((resolve) => {
+      let output = '';
+      child.stdout.on('data', (data) => {
+        output += data.toString();
+        // Once we see watch run output, we know it started successfully
+        if (output.includes('Run #1')) {
+          child.kill('SIGINT');
+        }
+      });
+      child.on('close', (code) => {
+        expect(output).toContain('Run #1');
+        resolve();
+      });
+      // Safety: kill after 5s if it doesn't produce output
+      setTimeout(() => {
+        child.kill('SIGINT');
+      }, 5000);
+    });
+  });
+
+  it('re-runs validation when file changes', () => {
+    const filePath = path.join(tmpDir, 'test.md');
+    fs.writeFileSync(filePath, validDoc, 'utf-8');
+    const child = spawn('node', [CLI, 'validate', '--watch', filePath], {
+      cwd: tmpDir,
+      env: { ...process.env, NO_COLOR: '1' },
+    });
+    return new Promise<void>((resolve) => {
+      let output = '';
+      let modifiedFile = false;
+      child.stdout.on('data', (data) => {
+        output += data.toString();
+        // After first run, modify the file to trigger a re-run
+        if (output.includes('Run #1') && !modifiedFile) {
+          modifiedFile = true;
+          // Wait a bit then modify the file
+          setTimeout(() => {
+            fs.writeFileSync(filePath, validDoc + '\n<!-- changed -->\n', 'utf-8');
+          }, 500);
+        }
+        if (output.includes('Run #2')) {
+          child.kill('SIGINT');
+        }
+      });
+      child.on('close', () => {
+        expect(output).toContain('Run #1');
+        expect(output).toContain('Run #2');
+        resolve();
+      });
+      // Safety timeout
+      setTimeout(() => {
+        child.kill('SIGINT');
+      }, 10000);
+    });
+  });
+
+  it('--watch --json produces newline-delimited JSON', () => {
+    const filePath = path.join(tmpDir, 'test.md');
+    fs.writeFileSync(filePath, validDoc, 'utf-8');
+    const child = spawn('node', [CLI, '--json', 'validate', '--watch', filePath], {
+      cwd: tmpDir,
+      env: { ...process.env, NO_COLOR: '1' },
+    });
+    return new Promise<void>((resolve) => {
+      let output = '';
+      child.stdout.on('data', (data) => {
+        output += data.toString();
+        // After getting the first JSON line, kill it
+        if (output.includes('"runNumber"')) {
+          child.kill('SIGINT');
+        }
+      });
+      child.on('close', () => {
+        const lines = output.trim().split('\n').filter(l => l.trim());
+        expect(lines.length).toBeGreaterThanOrEqual(1);
+        const parsed = JSON.parse(lines[0]);
+        expect(parsed.runNumber).toBe(1);
+        expect(parsed.success).toBe(true);
+        expect(parsed.diagnostics).toBeDefined();
+        resolve();
+      });
+      setTimeout(() => {
+        child.kill('SIGINT');
+      }, 5000);
+    });
   });
 });
