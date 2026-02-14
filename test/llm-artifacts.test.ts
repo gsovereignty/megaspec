@@ -77,6 +77,20 @@ describe('LLM Artifact Scanner — Typography', () => {
     expect(typo.some((m) => m.text === '—')).toBe(true);
   });
 
+  it('detects double hyphens as LLM artifacts', () => {
+    const content = 'This is important -- very important.';
+    const matches = scanLlmArtifacts(content);
+    const typo = matches.filter((m) => m.category === 'typography');
+    expect(typo.some((m) => m.text === '--')).toBe(true);
+  });
+
+  it('does not flag triple hyphens as double hyphens', () => {
+    const content = 'A horizontal rule follows.\n---\nMore text.';
+    const matches = scanLlmArtifacts(content);
+    const doubleHyphen = matches.filter((m) => m.text === '--');
+    expect(doubleHyphen.length).toBe(0);
+  });
+
   it('detects smart quotes', () => {
     const content = 'She said \u201CHello\u201D and \u2018Goodbye\u2019.';
     const matches = scanLlmArtifacts(content);

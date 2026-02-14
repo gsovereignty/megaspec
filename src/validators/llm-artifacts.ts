@@ -96,6 +96,7 @@ const OVERUSED_WORDS: WordEntry[] = [
 // ---------------------------------------------------------------------------
 
 const EM_DASH_REGEX = /\u2014/g; // — (em dash)
+const DOUBLE_HYPHEN_REGEX = /(?<!-)--(?!-)/g; // -- (double hyphen, LLM stand-in for em dash)
 const SMART_QUOTE_REGEX = /[\u201C\u201D\u2018\u2019]/g; // "" ''
 const DECORATIVE_EMOJI_REGEX =
   /[\u{1F680}\u{1F4A1}\u2728\u{1F3AF}\u{1F511}\u{1F31F}\u2B50\u{1F3C6}\u{1F4CC}\u{1F525}\u{1F4AA}\u{1F389}\u{1F449}\u26A1\u{1F914}\u{1F9E0}\u{1F4DD}\u{1F6E0}\u{1F50D}\u{1F4CA}]\u{FE0F}?/gu;
@@ -251,6 +252,20 @@ export function scanLlmArtifacts(content: string): LlmArtifactMatch[] {
       });
     }
 
+    // Double hyphens (LLM em-dash substitute)
+    DOUBLE_HYPHEN_REGEX.lastIndex = 0;
+    while ((m = DOUBLE_HYPHEN_REGEX.exec(lines[i])) !== null) {
+      matches.push({
+        line: i + 1,
+        column: m.index + 1,
+        length: 2,
+        text: '--',
+        category: 'typography',
+        replacement: ' - ',
+        message: 'LLM artifact: double hyphen "--" — use " - " or rewrite the sentence [RF-19]',
+      });
+    }
+
     // Smart quotes
     SMART_QUOTE_REGEX.lastIndex = 0;
     while ((m = SMART_QUOTE_REGEX.exec(lines[i])) !== null) {
@@ -390,7 +405,7 @@ export function getDictionaryStats(): {
   return {
     words: OVERUSED_WORDS.length,
     phrases: FILLER_PHRASES.length,
-    typographic: 3, // em dash, smart quotes, decorative emoji
+    typographic: 4, // em dash, double hyphen, smart quotes, decorative emoji
     structural: STRUCTURAL_OPENERS.length,
   };
 }

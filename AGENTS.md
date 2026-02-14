@@ -60,6 +60,7 @@ Always open `@/prd.md` when the request:
 - Every agent-produced artifact MUST include `## Agent Contributions` (DF-028)
 - Human review gate is MANDATORY — never bypass it (DF-080)
 - Published files MUST be flat in `publish/` — no subdirectories (DF-029)
+- After completing any implementation task, ALWAYS run `pnpm build && pnpm link --global` to rebuild and relink the CLI binary
 
 ## Git Commit Messages
 
