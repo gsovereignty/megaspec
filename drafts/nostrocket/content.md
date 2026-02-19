@@ -1,9 +1,10 @@
 # The Protocol
 
-Everything in Nostrocket reduces to one loop: find a problem, solve it, get equity. No interviews. No permission. No funding rounds. Just work, verified by the people who already have skin in the game.
+Everything in Nostrocket reduces to one loop: find a problem, solve it, get equity [AGENT: this is not the full loop, the full loop includes revenue distribution]. No interviews. No permission. No funding rounds. Just proof of work, verified by the people who already have skin in the game.
 
 By the end of this chapter, you'll understand the protocol precisely enough that you could implement it, and plainly enough that you shouldn't need to be a developer to follow it.
 
+[AGENT: add this to its own section.] 
 A note on governance before we begin: throughout this chapter you'll encounter the concept of "votepower" — the governance mechanism of Nostrocket. Here's what votepower can actually do: it votes to approve or reject merit requests (deciding who gets equity for what work), and it can add or remove Maintainers (the people who merge code). That's it. Votepower does not direct strategy, assign work, set priorities, or tell anyone what to build. Governance in Nostrocket is narrow by design — it exists only to protect the integrity of the equity ledger and the quality of the codebase.
 
 ---
@@ -14,7 +15,7 @@ The usefulness of a bucket is created by its base and sides — by the restricti
 
 Nostrocket works the same way. The protocol doesn't tell anyone what to build, how to build it, or when to build it. It defines the boundary conditions on human action within a Rocket — what you cannot do and still be operating within the system. Everything else is up to you.
 
-This is not a metaphor. It is the core design principle. The protocol is a set of simple rules that create the conditions for complex, emergent behaviour — products, services, and solutions that no one planned in advance. Projects like ZeroMQ have proven that valuable software can evolve from simple rules with no upfront planning or leadership. Nostrocket applies the same principle to entire organizations.
+This isn't a metaphor. It's the core design principle. The protocol is a set of simple rules that create the conditions for complex, emergent behaviour: products, services, and solutions that no one necessarily planned in advance. Projects like ZeroMQ have proven that valuable software can evolve from simple rules with no upfront planning or leadership. Nostrocket applies the same principle to entire organizations.
 
 The protocol's fitness function — the thing it optimizes for — is **increasing the number of Participants**. The first thing a reader might think is: "but a system needs profit, not just users." This is true. But blindly chasing profit has disastrous consequences — it's how you end up with the same extractive, parasitic structures we're trying to replace. By optimizing for participation, we ensure that profitability actually serves the interests of participants and, by extension, the rest of humanity. A Rocket that generates profit but repels contributors is dying. A Rocket that attracts contributors is, by definition, solving problems people care about — and that is the foundation of sustainable profit. The two aren't in tension; participation is just the more honest measure. With that foundation, let's examine the structural principle that makes this possible.
 
@@ -22,23 +23,17 @@ The protocol's fitness function — the thing it optimizes for — is **increasi
 
 ## Why Mutexless
 
-Most organizations slow down as they grow. This isn't a people problem — it's a structural one, and it's described precisely by Amdahl's Law.
+Most organizations slow down as they grow. This isn't a people problem — it's a structural one, described by Amdahl's Law.
 
 Amdahl's Law is a formula from computing that describes the maximum speedup you can get by adding more processors to a task. The formula is simple: if any fraction of the work must be done sequentially — one step at a time, with everything else waiting — then that fraction creates a hard ceiling on how much parallelism can help, no matter how many processors you throw at it.
 
-The numbers are striking. If just 5% of a task is sequential and the rest can be parallelized, twenty processors don't give you a 20× speedup — they give you roughly 10×. Add a hundred processors and you get about 17×. Add a thousand and you barely move past 19×. The maximum theoretical speedup with 5% sequential work is 20×, and no amount of additional processors will ever get you past it. If 25% of the task is sequential, the ceiling drops to 4× — no matter how many processors you have. At 50% sequential, the ceiling is 2×. You could have a million processors and they'd sit idle, waiting.
+The math is unforgiving. If 5% of a task is sequential, your maximum speedup is 20× — even with a thousand processors. Raise that to 25% sequential and the ceiling drops to 4×. At 50%, it's 2×. The rest of your processing capacity sits idle, doing nothing.
 
-The relationship is brutally non-linear. A small increase in the sequential fraction causes a large decrease in the maximum possible speedup. Going from 5% sequential to 10% cuts your ceiling in half — from 20× to 10×. That's a doubling of bureaucracy causing a halving of potential.
+Human organizations follow the same law. People are the processors. Every meeting, approval chain, code review, and planning session is a sequential operation — a mutex. In a typical company, employees spend 20–30% of their time in some form of sequential operation. Amdahl's Law caps the effective speedup at 3–5× regardless of how many people you add to the team. Amazon's "two pizza rule" is a practical admission of this ceiling.
 
-Human organizations obey the same law. Individuals are the processors. Every time the team has to stop and synchronize — a meeting, an approval chain, a planning session, a consensus-building exercise — that's a sequential operation. A mutex. The question is: what fraction of work in a typical company requires people to stop and wait for others?
+Nostrocket is designed to be "mutexless" — a structure where no one needs permission or agreement to do productive work. As the serial fraction approaches zero, the limit on team size approaches infinity.
 
-Consider a software company with sprint planning, daily standups, code reviews, design reviews, stakeholder approvals, and cross-team coordination meetings. A generous estimate might be that 20–30% of a developer's time is spent in sequential synchronization. Amdahl's Law says that means the maximum effective speedup from adding developers is somewhere between 3× and 5×. After about fifteen to twenty people, adding more developers produces negligible additional output. This isn't a management failure — it's physics. Amazon's "two pizza rule" (keep teams to six or eight people) is a practical acknowledgment that organizations can't scale past their serial fraction.
-
-Requiring permission is a sequential operation. Requiring agreement on what to build is a sequential operation. Meetings are the mutexes of human organizations.
-
-The most efficient possible organizational structure is one where participants can do productive work without requiring any permission or agreement from others about what that work should be. This is what "mutexless" means, and it is what Nostrocket is designed to be. The serial fraction approaches zero, which means the theoretical ceiling on team size approaches infinity.
-
-In a mutexless system, a contributor can identify a problem, solve it, and submit the solution — all without anyone knowing they were working on it, without any upfront agreement on what was being built, and without waiting for anyone else. The protocol's boundary conditions ensure that this independent work converges toward something coherent and valuable, the same way water in a bucket finds its level without anyone directing it. Now that the structural case is clear, the next question is what motivates people to participate.
+A contributor identifies a problem, solves it, and submits the solution — without waiting for anyone, without asking, without coordinating. The protocol's boundary conditions ensure independent work converges toward something coherent, the way water finds its path down a steam. Now that the structural case is clear, the next question is what motivates people to participate.
 
 ---
 
