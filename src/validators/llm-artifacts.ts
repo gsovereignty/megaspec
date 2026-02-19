@@ -9,7 +9,7 @@
 
 export interface LlmArtifactPattern {
   pattern: string | RegExp;
-  category: 'word' | 'typography' | 'phrase' | 'structural';
+  category: 'word' | 'typography' | 'phrase' | 'structural' | 'contraction';
   replacement: string;
   message: string;
 }
@@ -19,7 +19,7 @@ export interface LlmArtifactMatch {
   column: number;
   length: number;
   text: string;
-  category: 'word' | 'typography' | 'phrase' | 'structural';
+  category: 'word' | 'typography' | 'phrase' | 'structural' | 'contraction';
   replacement: string;
   message: string;
 }
@@ -153,6 +153,94 @@ const STRUCTURAL_REGEX = new RegExp(
   `(?:^|(?<=\\.\\s))(${STRUCTURAL_OPENERS.join('|')}),\\s`,
   'gm',
 );
+
+// ---------------------------------------------------------------------------
+// Category E: Non-Contracted Forms (DF-091)
+// LLMs avoid contractions; natural writing uses them.
+// ---------------------------------------------------------------------------
+
+interface ContractionEntry {
+  regex: RegExp;
+  contraction: string;
+}
+
+const CONTRACTION_ENTRIES: ContractionEntry[] = [
+  // --- Verb + not ---
+  { regex: /\bis not\b/gi, contraction: "isn't" },
+  { regex: /\bare not\b/gi, contraction: "aren't" },
+  { regex: /\bwas not\b/gi, contraction: "wasn't" },
+  { regex: /\bwere not\b/gi, contraction: "weren't" },
+  { regex: /\bhas not\b/gi, contraction: "hasn't" },
+  { regex: /\bhave not\b/gi, contraction: "haven't" },
+  { regex: /\bhad not\b/gi, contraction: "hadn't" },
+  { regex: /\bwill not\b/gi, contraction: "won't" },
+  { regex: /\bwould not\b/gi, contraction: "wouldn't" },
+  { regex: /\bdo not\b/gi, contraction: "don't" },
+  { regex: /\bdoes not\b/gi, contraction: "doesn't" },
+  { regex: /\bdid not\b/gi, contraction: "didn't" },
+  { regex: /\bcannot\b/gi, contraction: "can't" },
+  { regex: /\bcan not\b/gi, contraction: "can't" },
+  { regex: /\bcould not\b/gi, contraction: "couldn't" },
+  { regex: /\bshould not\b/gi, contraction: "shouldn't" },
+  { regex: /\bmust not\b/gi, contraction: "mustn't" },
+  { regex: /\bneed not\b/gi, contraction: "needn't" },
+  // --- Pronoun/word + is ---
+  { regex: /\bit is\b/gi, contraction: "it's" },
+  { regex: /\bhe is\b/gi, contraction: "he's" },
+  { regex: /\bshe is\b/gi, contraction: "she's" },
+  { regex: /\bthat is\b/gi, contraction: "that's" },
+  { regex: /\bthere is\b/gi, contraction: "there's" },
+  { regex: /\bhere is\b/gi, contraction: "here's" },
+  { regex: /\bwhat is\b/gi, contraction: "what's" },
+  { regex: /\bwho is\b/gi, contraction: "who's" },
+  { regex: /\bwhere is\b/gi, contraction: "where's" },
+  { regex: /\bhow is\b/gi, contraction: "how's" },
+  // --- Pronoun + are ---
+  { regex: /\byou are\b/gi, contraction: "you're" },
+  { regex: /\bwe are\b/gi, contraction: "we're" },
+  { regex: /\bthey are\b/gi, contraction: "they're" },
+  // --- Pronoun + am ---
+  { regex: /\bI am\b/g, contraction: "I'm" },
+  // --- Pronoun/word + has ---
+  { regex: /\bit has\b/gi, contraction: "it's" },
+  { regex: /\bhe has\b/gi, contraction: "he's" },
+  { regex: /\bshe has\b/gi, contraction: "she's" },
+  { regex: /\bthat has\b/gi, contraction: "that's" },
+  { regex: /\bthere has\b/gi, contraction: "there's" },
+  { regex: /\bwhat has\b/gi, contraction: "what's" },
+  { regex: /\bwho has\b/gi, contraction: "who's" },
+  // --- Pronoun + have ---
+  { regex: /\bI have\b/g, contraction: "I've" },
+  { regex: /\byou have\b/gi, contraction: "you've" },
+  { regex: /\bwe have\b/gi, contraction: "we've" },
+  { regex: /\bthey have\b/gi, contraction: "they've" },
+  // --- Pronoun/word + will ---
+  { regex: /\bI will\b/g, contraction: "I'll" },
+  { regex: /\byou will\b/gi, contraction: "you'll" },
+  { regex: /\bhe will\b/gi, contraction: "he'll" },
+  { regex: /\bshe will\b/gi, contraction: "she'll" },
+  { regex: /\bit will\b/gi, contraction: "it'll" },
+  { regex: /\bwe will\b/gi, contraction: "we'll" },
+  { regex: /\bthey will\b/gi, contraction: "they'll" },
+  { regex: /\bthat will\b/gi, contraction: "that'll" },
+  // --- Pronoun + would ---
+  { regex: /\bI would\b/g, contraction: "I'd" },
+  { regex: /\byou would\b/gi, contraction: "you'd" },
+  { regex: /\bhe would\b/gi, contraction: "he'd" },
+  { regex: /\bshe would\b/gi, contraction: "she'd" },
+  { regex: /\bit would\b/gi, contraction: "it'd" },
+  { regex: /\bwe would\b/gi, contraction: "we'd" },
+  { regex: /\bthey would\b/gi, contraction: "they'd" },
+  // --- Pronoun + had ---
+  { regex: /\bI had\b/g, contraction: "I'd" },
+  { regex: /\byou had\b/gi, contraction: "you'd" },
+  { regex: /\bhe had\b/gi, contraction: "he'd" },
+  { regex: /\bshe had\b/gi, contraction: "she'd" },
+  { regex: /\bwe had\b/gi, contraction: "we'd" },
+  { regex: /\bthey had\b/gi, contraction: "they'd" },
+  // --- Other ---
+  { regex: /\blet us\b/gi, contraction: "let's" },
+];
 
 // ---------------------------------------------------------------------------
 // Content-zone detection helpers
@@ -331,6 +419,23 @@ export function scanLlmArtifacts(content: string): LlmArtifactMatch[] {
         message: `LLM artifact: sentence starts with "${opener}," — vary transitions [RF-19]`,
       });
     }
+
+    // Category E: Non-contracted forms
+    for (const entry of CONTRACTION_ENTRIES) {
+      entry.regex.lastIndex = 0;
+      let cm: RegExpExecArray | null;
+      while ((cm = entry.regex.exec(cleaned)) !== null) {
+        matches.push({
+          line: i + 1,
+          column: cm.index + 1,
+          length: cm[0].length,
+          text: cm[0],
+          category: 'contraction',
+          replacement: entry.contraction,
+          message: `Use contraction: "${entry.contraction}" instead of "${cm[0]}" [RF-19]`,
+        });
+      }
+    }
   }
 
   // Sort by line then column for stable output
@@ -401,11 +506,13 @@ export function getDictionaryStats(): {
   phrases: number;
   typographic: number;
   structural: number;
+  contractions: number;
 } {
   return {
     words: OVERUSED_WORDS.length,
     phrases: FILLER_PHRASES.length,
     typographic: 4, // em dash, double hyphen, smart quotes, decorative emoji
     structural: STRUCTURAL_OPENERS.length,
+    contractions: CONTRACTION_ENTRIES.length,
   };
 }

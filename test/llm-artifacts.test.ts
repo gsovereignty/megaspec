@@ -16,11 +16,17 @@ describe('LLM Artifact Dictionary (DF-090)', () => {
     expect(stats.phrases).toBeGreaterThanOrEqual(10);
     expect(stats.typographic).toBeGreaterThanOrEqual(3);
     expect(stats.structural).toBeGreaterThanOrEqual(6);
+    expect(stats.contractions).toBeGreaterThanOrEqual(10);
   });
 
   it('has ≥50 overused word roots', () => {
     const stats = getDictionaryStats();
     expect(stats.words).toBeGreaterThanOrEqual(50);
+  });
+
+  it('has ≥50 contraction entries', () => {
+    const stats = getDictionaryStats();
+    expect(stats.contractions).toBeGreaterThanOrEqual(50);
   });
 });
 
@@ -146,6 +152,114 @@ describe('LLM Artifact Scanner — Structural', () => {
     const structural = matches.filter((m) => m.category === 'structural');
     expect(structural.length).toBe(1);
     expect(structural[0].text).toContain('Moreover');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// DF-091: Scanner — Category E (Contractions)
+// ---------------------------------------------------------------------------
+
+describe('LLM Artifact Scanner — Contractions', () => {
+  it('detects "it is" and suggests "it\'s"', () => {
+    const content = 'It is the starting gun.';
+    const matches = scanLlmArtifacts(content);
+    const contractions = matches.filter((m) => m.category === 'contraction');
+    expect(contractions.length).toBe(1);
+    expect(contractions[0].replacement).toBe("it's");
+  });
+
+  it('detects "do not" and suggests "don\'t"', () => {
+    const content = 'They do not need to win wars.';
+    const matches = scanLlmArtifacts(content);
+    const contractions = matches.filter((m) => m.category === 'contraction');
+    expect(contractions.some((m) => m.replacement === "don't")).toBe(true);
+  });
+
+  it('detects "will not" and suggests "won\'t"', () => {
+    const content = 'These trends will not reverse.';
+    const matches = scanLlmArtifacts(content);
+    const contractions = matches.filter((m) => m.category === 'contraction');
+    expect(contractions.some((m) => m.replacement === "won't")).toBe(true);
+  });
+
+  it('detects "cannot" and suggests "can\'t"', () => {
+    const content = 'The pragmatists cannot fire the hardliners.';
+    const matches = scanLlmArtifacts(content);
+    const contractions = matches.filter((m) => m.category === 'contraction');
+    expect(contractions.some((m) => m.replacement === "can't")).toBe(true);
+  });
+
+  it('detects "they are" and suggests "they\'re"', () => {
+    const content = 'They are true believers.';
+    const matches = scanLlmArtifacts(content);
+    const contractions = matches.filter((m) => m.category === 'contraction');
+    expect(contractions.some((m) => m.replacement === "they're")).toBe(true);
+  });
+
+  it('detects "you are" and suggests "you\'re"', () => {
+    const content = 'You are living through a transition.';
+    const matches = scanLlmArtifacts(content);
+    const contractions = matches.filter((m) => m.category === 'contraction');
+    expect(contractions.some((m) => m.replacement === "you're")).toBe(true);
+  });
+
+  it('detects "we have" and suggests "we\'ve"', () => {
+    const content = 'We have seen this pattern before.';
+    const matches = scanLlmArtifacts(content);
+    const contractions = matches.filter((m) => m.category === 'contraction');
+    expect(contractions.some((m) => m.replacement === "we've")).toBe(true);
+  });
+
+  it('detects "I will" and suggests "I\'ll"', () => {
+    const content = 'I will explain why.';
+    const matches = scanLlmArtifacts(content);
+    const contractions = matches.filter((m) => m.category === 'contraction');
+    expect(contractions.some((m) => m.replacement === "I'll")).toBe(true);
+  });
+
+  it('detects "let us" and suggests "let\'s"', () => {
+    const content = 'Let us examine the data.';
+    const matches = scanLlmArtifacts(content);
+    const contractions = matches.filter((m) => m.category === 'contraction');
+    expect(contractions.some((m) => m.replacement === "let's")).toBe(true);
+  });
+
+  it('detects multiple contractions on the same line', () => {
+    const content = 'It is clear they do not understand.';
+    const matches = scanLlmArtifacts(content);
+    const contractions = matches.filter((m) => m.category === 'contraction');
+    expect(contractions.length).toBe(2);
+  });
+
+  it('does not flag text inside code blocks', () => {
+    const content = `Some text.
+
+\`\`\`js
+// It is a constant
+const x = "do not change";
+\`\`\`
+
+Clean text.`;
+    const matches = scanLlmArtifacts(content);
+    const contractions = matches.filter((m) => m.category === 'contraction');
+    expect(contractions.length).toBe(0);
+  });
+
+  it('does not flag text inside inline code', () => {
+    const content = 'The `it is` function returns true.';
+    const matches = scanLlmArtifacts(content);
+    const contractions = matches.filter((m) => m.category === 'contraction');
+    expect(contractions.length).toBe(0);
+  });
+
+  it('includes RF-19 citation in messages', () => {
+    const content = 'It is important.';
+    const matches = scanLlmArtifacts(content);
+    const contractions = matches.filter((m) => m.category === 'contraction');
+    expect(contractions.length).toBeGreaterThan(0);
+    for (const m of contractions) {
+      expect(m.message).toContain('[RF-19]');
+    }
   });
 });
 

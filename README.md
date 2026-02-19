@@ -2,7 +2,7 @@
 
 CLI tool that helps subject matter experts produce engaging, research-backed documentation.
 
-DocFlow leverages research from classical rhetoric, cognitive science, instructional design, and modern UX to validate and improve technical writing — tutorials, references, guides, and whitepapers.
+DocFlow uses research from classical rhetoric, cognitive science, instructional design, and modern UX to validate and improve technical writing — tutorials, references, guides, and whitepapers. It generates instruction files that AI coding assistants read and follow, then validates the output against 80+ traceable requirements.
 
 ## Installation
 
@@ -215,6 +215,53 @@ All commands support:
 |------|-------------|
 | `--json` | Output results as JSON |
 | `--no-interactive` | Disable interactive prompts |
+
+## LLM Artifact Detection
+
+DocFlow scans for patterns that reveal AI-generated text (DF-090/DF-091, backed by [Kobak et al. 2024](https://www.science.org/doi/10.1126/sciadv.adn2533)):
+
+| Category | Count | Examples |
+|----------|-------|----------|
+| Overused style words | 54 | delve, comprehensive, pivotal, robust, seamless |
+| Filler/hedge phrases | 21 | "it's worth noting that", "in order to", "a myriad of" |
+| Typographic artifacts | 4 | em dash (`—`), double hyphen (`--`), smart quotes, decorative emoji |
+| Structural openers | 6 | "Additionally,", "Furthermore,", "Moreover," |
+| Non-contracted forms | 65 | "it is" → "it's", "do not" → "don't", "cannot" → "can't" |
+
+Use `--strip-llm` to auto-fix detectable artifacts:
+
+```bash
+docflow validate drafts/my-post/content.md --strip-llm
+```
+
+## Engagement Scoring
+
+Every document gets scored across 5 research-backed dimensions:
+
+| Dimension | Weight | What it measures |
+|-----------|--------|------------------|
+| Curiosity | 25% | Questions, opening hooks, information gaps, concrete stats |
+| Clarity | 25% | Flesch-Kincaid grade, sentence length, heading descriptiveness |
+| Action | 20% | Code blocks, examples, exercises, step indicators |
+| Flow | 15% | Section transitions, next steps, narrative arc (setup → resolution) |
+| Voice | 15% | Reader pronouns ("you"), active voice ratio, engaging tone |
+
+Target: 90+ in each dimension for publication-ready content.
+
+```bash
+docflow validate drafts/my-post/content.md --engagement-report
+```
+
+## Validation Profiles
+
+Each content type has a tailored rule set:
+
+| Profile | Key rules |
+|---------|-----------|
+| **Guide** | Opening hook, example per H2, question framing, next steps |
+| **Tutorial** | Step-by-step structure, Gagné's Nine Events, worked examples |
+| **Reference** | Consistent structure, complete coverage, scannable layout |
+| **Whitepaper** | Thesis statement, evidence chains, executive summary |
 
 ## Development
 
