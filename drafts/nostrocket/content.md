@@ -33,7 +33,9 @@ Human organizations follow the same law. People are the processors. Every meetin
 
 Nostrocket is designed to be "mutexless" — a structure where no one needs permission or agreement to do productive work. As the serial fraction approaches zero, the limit on team size approaches infinity.
 
-A contributor identifies a problem, solves it, and submits the solution — without waiting for anyone, without asking, without coordinating. The protocol's boundary conditions ensure independent work converges toward something coherent, the way water finds its path down a steam. Now that the structural case is clear, the next question is what motivates people to participate.
+A contributor who abides by the rules identifies a problem, solves it, and submits the solution, which is merged into production — without waiting for anyone, without asking, without coordinating. The protocol's boundary conditions ensure independent work converges toward something coherent. As Alan Watts put it: "The river is not pushed from behind, nor is it pulled from ahead. It falls with gravity."
+
+The next question is: what motivates people to participate?
 
 ---
 
@@ -41,9 +43,9 @@ A contributor identifies a problem, solves it, and submits the solution — with
 
 Human action within Nostrocket must be executed for purely self-interested reasons. This is not a concession to human nature — it is a design requirement.
 
-When people solve problems because they genuinely care about the problem, the solutions are more accurate than when they're doing it because someone is coercing them with money or managing their priorities. The difference between organic Wikipedia contributions and paid ones illustrates this clearly. Self-interested action is more efficient, more accurate, more scalable, and minimizes the social attack surface — there's nothing to corrupt if no one is directing anyone.
+When people solve problems because they genuinely care about the problem, the solutions are more accurate than when they're doing it because someone else is managing their priorities. The difference between organic Wikipedia contributions and paid ones illustrates this clearly. Self-interested action is more efficient, more accurate, more scalable, and minimizes the social attack surface — there's nothing to corrupt if no one is directing anyone.
 
-The protocol creates the conditions where self-interest and collective benefit are aligned: solve a real problem, get equity, and your equity becomes more valuable as the project succeeds. No one needs to be altruistic. The boundary conditions channel self-interest into productive work the same way a riverbank channels water downstream. Building on this principle, let's look at the two technical layers that make the system work.
+The protocol creates the conditions where self-interest and collective benefit are aligned: solve a real problem, get equity. Your equity becomes more valuable as the project succeeds and people pay to consume its products/services. No one needs to be altruistic. The Daoists called this quality *ziran*: things unfolding according to their own nature without external compulsion. The boundary conditions channel self-interest into productive work the same way water creates a riverbank that channels more water. The *Dao De Jing* describes the ideal result: "Perform actions, accomplish deeds; the people will say it happened naturally." Building on this principle, let's look at the two technical layers that make the system work.
 
 ---
 
@@ -77,7 +79,7 @@ Each Rocket has its own independent merit system — its own merit supply, its o
 
 **Cross-ownership:** Rockets can hold merits in other Rockets. If Rocket A builds something that Rocket B uses, Rocket B's merit holders might approve a merit grant to Rocket A. This creates economic alignment across the ecosystem without requiring any central coordination.
 
-**The Root Rocket:** The foundational Rocket — Nostrocket itself — builds and maintains the protocol infrastructure. It generates revenue by receiving merits from other Rockets that use the infrastructure. This makes it simple for anyone to create their own Rocket without building infrastructure from scratch; the Root Rocket has already solved that problem and is compensated for it.
+**The Root Rocket:** The foundational Rocket — Nostrocket itself — builds and maintains the protocol infrastructure. It generates revenue by receiving merits from other Rockets that use the infrastructure. Like the ocean in the *Dao De Jing* that masters all streams by staying below them, the Root Rocket leads the ecosystem by serving it. This makes it simple for anyone to create their own Rocket without building infrastructure from scratch; the Root Rocket has already solved that problem and is compensated for it. [AGENT: the incentive here is for the root rocket to create the infrastructure in a way that makes the other rockets more profitable since it gets paid with their revenue]
 
 **Cross-Rocket merit requests:** When a solution benefits multiple Rockets — say, a shared payment processing library — the contributor can request merits from each Rocket independently. Each Rocket's merit holders vote separately on whether the work was valuable to them. A solution rejected by one Rocket's merit holders might still be approved by another's. With that architecture in place, let's look at how work gets identified and organized.
 
@@ -120,7 +122,7 @@ All problems in the global graph trace back to a single root: "Humanity is not l
 
 Big problems get decomposed into smaller child problems, each solvable in a single focused session. A parent problem isn't considered solved until all its children are resolved. Only leaf nodes — problems with no unsolved children — are actionable. You can't file a merit request against a parent problem that still has open children; by definition, it isn't solved yet.
 
-**Why granularity matters:** Nostrocket is a hill-climbing algorithm. It makes progress through many small, correct steps — not giant leaps. Every piece of work must be small enough to complete in less than a day. This isn't arbitrary. It serves three purposes:
+**Why granularity matters:** Nostrocket is a hill-climbing algorithm. It makes progress through many small steps — not giant leaps. The *Dao De Jing* puts it directly: "A journey of a thousand miles begins beneath one's feet." Every piece of work must be small enough to complete in less than a day. This isn't arbitrary. It serves three purposes:
 
 1. **Granularity.** Small changes are easy to review, easy to verify, and easy to reverse if something goes wrong.
 2. **Risk reduction.** If you spend three weeks on a solution and your merit request gets rejected, you've lost three weeks. If you spend four hours, you've lost an afternoon.
@@ -188,7 +190,7 @@ Each Rocket has its own receiving address and its own revenue stream. If you hol
 
 ### No Capital Retention
 
-A Rocket must not retain any capital or raise any funds. This is not a preference — it is a hard constraint. When there's a pot of money available, Mallory finds a way to corrupt whatever is guarding it. Retaining capital is an anti-pattern that fundamentally precludes decentralization. Every sat of revenue goes directly to merit holders. Every sat of operational cost is borne by whoever wants to solve that problem and earn merits for it.
+A Rocket must not retain any capital or raise any funds. This is not a preference — it is a hard constraint. The *Dao De Jing* warns: "Brimming a hall with riches, one shall not be able to keep it." When there's a pot of money available, Mallory finds a way to corrupt whatever is guarding it. Retaining capital is an anti-pattern that fundamentally precludes decentralization. Every sat of revenue goes directly to merit holders. Every sat of operational cost is borne by whoever wants to solve that problem and earn merits for it.
 
 **Operational costs:** If a project needs infrastructure — servers, domains, services — someone pays for it and files a merit request. This is how you turn money into merits. You're not donating to a treasury; you're acquiring equity by solving the problem of "this project needs infrastructure" and providing that infrastructure as a service to the Rocket.
 
@@ -291,7 +293,7 @@ Maintainers are the quality gatekeepers for a Rocket's codebase. They have one s
 
 The first Maintainer is the Rocket's founder. Maintainers can elevate contributors to Maintainer status, creating a tree. A Maintainer can remove any Maintainer below them in the tree. Votepower can also add or remove any Maintainer — this is the community's check on the Maintainer hierarchy.
 
-This is hierarchy, and it's intentional. The Maintainer role exists to keep the system running cleanly, not to direct strategy or assign work. Maintainers should usually be people with votepower — people with skin in the game who are invested in the Rocket's long-term health. They can submit merit requests for the time they spend reviewing and merging patches, just like any other contribution.
+This is hierarchy, and it's intentional. The *Dao De Jing* ranks rulers: "Great rulers are hardly known by their subjects". The best Maintainer is one whose decisions are so obviously correct that contributors barely notice them. The role exists to keep the system running cleanly, not to direct strategy or assign work. Maintainers should usually be people with votepower — people with skin in the game who are invested in the Rocket's long-term health. They can submit merit requests for the time they spend reviewing and merging patches, just like any other contribution.
 
 **What keeps Maintainers honest?** Forking. If the Maintainers of a Rocket become corrupt or incompetent, anyone can fork the project. The person who creates a fork decides what state to carry over — including the existing merit ledger, modified however they see fit to exclude bad actors. The threat of fork is the ultimate accountability mechanism: it means Maintainers serve at the pleasure of the community, whether they acknowledge it or not.
 
@@ -326,7 +328,7 @@ If a Rocket's merit holders make consistently bad decisions — approving inflat
 
 This means every decision made within a Rocket is ultimately accountable to the market. A Rocket that treats contributors fairly retains talent. One that doesn't, loses contributors to competing Rockets. No appeals process needed. No governance committee. The market decides.
 
-This is what makes Nostrocket fundamentally different from a company. In a company, if management is incompetent, your options are to complain, politic, or quit. In Nostrocket, you fork — and you take the code and potentially the users with you. Let's bring everything together.
+This is what makes Nostrocket fundamentally different from a company. In a company, if management is incompetent, your options are to complain, politic, or quit. In Nostrocket, you fork — and you take the code and potentially the users with you. "Of all gentleness and submissiveness in the world, nothing compares to water, and to tackle stiffness and toughness there is nothing better." Forking is water. Let's bring everything together.
 
 ---
 
@@ -346,7 +348,7 @@ The protocol optimizes for one thing: increasing the number of Participants. Pro
 10. **Rockets are independent but connected.** Each has its own merit system and revenue. Rockets can hold merits in other Rockets. The Root Rocket provides infrastructure and earns merits across the ecosystem.
 11. **Forking is the ultimate accountability.** If the system breaks, someone forks and starts fresh.
 
-You now have a complete picture of the protocol's mechanics. The Nostr layer handles human coordination. The Bitcoin sidechain handles the shared truth that everyone must agree on to keep operating. The boundary conditions channel self-interested human action into productive work. Everything else emerges.
+You now have a complete picture of the protocol's mechanics. The Nostr layer handles human coordination. The Bitcoin sidechain handles the shared truth that everyone must agree on to keep operating. The boundary conditions channel self-interested human action into productive work. Everything else emerges — or as Ursula Le Guin rendered *wu wei*: "doing without doing, uncompetitive, unworried, trustful accomplishment, power that is not force."
 
 ---
 
