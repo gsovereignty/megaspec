@@ -31,7 +31,7 @@ describe('CLI integration', () => {
     const parsed = JSON.parse(result);
     expect(parsed.success).toBe(true);
     expect(parsed.created).toBeInstanceOf(Array);
-    expect(parsed.created.length).toBe(11);
+    expect(parsed.created.length).toBe(12);
     expect(parsed.skipped).toBeInstanceOf(Array);
     expect(parsed.skipped.length).toBe(0);
   });
@@ -50,7 +50,7 @@ describe('CLI integration', () => {
     const parsed = JSON.parse(result);
     expect(parsed.success).toBe(true);
     expect(parsed.created.length).toBe(0);
-    expect(parsed.skipped.length).toBe(11);
+    expect(parsed.skipped.length).toBe(12);
   });
 
   it('docflow init [path] creates a subdirectory', () => {

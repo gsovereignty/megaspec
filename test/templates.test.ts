@@ -122,4 +122,29 @@ describe('content-type templates', () => {
       expect(content).toMatch(/logical/i);
     });
   });
+
+  describe('religious-text.md', () => {
+    it('has correct YAML front matter', () => {
+      const content = fs.readFileSync(
+        path.join(tmpDir, 'templates', 'religious-text.md'),
+        'utf-8',
+      );
+      expect(content).toMatch(/type:\s*religious-text/);
+      expect(content).toMatch(/title:/);
+      expect(content).toMatch(/id:/);
+      expect(content).toMatch(/audience:/);
+    });
+
+    it('contains required sections', () => {
+      const content = fs.readFileSync(
+        path.join(tmpDir, 'templates', 'religious-text.md'),
+        'utf-8',
+      );
+      expect(content).toMatch(/Opening hook/i);
+      expect(content).toMatch(/## Core Teaching/);
+      expect(content).toMatch(/## Reflection and Application/);
+      expect(content).toMatch(/## Points for Meditation/);
+      expect(content).toMatch(/Cross-References/i);
+    });
+  });
 });

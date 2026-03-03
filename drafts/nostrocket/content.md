@@ -1,30 +1,24 @@
-# The Protocol
+# The Nostrocket Unprotocol
 
 Everything in Nostrocket reduces to one loop: find a problem, solve it, get equity, receive revenue. No interviews. No permission. No funding rounds. Just proof of work, verified by the people who already have skin in the game.
 
-By the end of this chapter, you'll understand the protocol precisely enough that you could implement it, and plainly enough that you shouldn't need to be a developer to follow it.
+By the end of this chapter, you'll understand the unprotocol precisely enough that you could implement it, and plainly enough that you shouldn't need to be a developer to follow it.
 
 ---
 
-## Governance Scope
+## What is the Unprotocol
 
-Throughout this chapter you'll encounter the concept of "votepower" — the governance mechanism of Nostrocket. Here's what votepower can actually do: it votes to approve or reject merit requests (deciding who gets equity for what work), and it can add or remove Maintainers (the people who merge code). That's it.
+The usefulness of a bucket exists due to the limitations imposed by its base and sides. A bucket is useful because it holds water by creating *boundary conditions* on what the water *cannot* do while *remaining in the bucket*.
 
-Votepower doesn't direct strategy, assign work, set priorities, or tell anyone what to build. Governance in Nostrocket is narrow by design — it exists only to protect the integrity of the equity ledger and the quality of the codebase.
+Nostrocket works the same way. The unprotocol doesn't tell anyone what to build, how to build it, or when to build it. It simply defines the boundary conditions on human action within a Rocket — what you *cannot* do while still be operating within the system. Everything else is up to you.
 
----
+This isn't a metaphor. It's the core design principle. The unprotocol is a set of simple rules that create the conditions for complex, emergent behaviour: products, services, and solutions that no one *necessarily* planned in advance. Projects like ZeroMQ have proven that valuable software can evolve from simple rules with no upfront planning or leadership. Nostrocket applies the same principle to entire organizations.
 
-## What the Protocol Is
+The unprotocol's fitness function (what it optimizes for) is **increasing the number of Participants**. Profit is in the critical path to increased participation, but blindly chasing profit has proven to have disastrous consequences — it's how you end up with the same extractive, parasitic structures we're trying to replace.
 
-The usefulness of a bucket is created by its base and sides — by the restrictions on what water *cannot* do while remaining in the bucket. The bucket doesn't tell the water where to go. It defines the boundary conditions, and the water does the rest.
+By optimizing for participation, we ensure that profitability actually serves the interests of participants and, by extension, the rest of humanity. The two aren't in tension; participation is just the more honest measure. 
 
-Nostrocket works the same way. The protocol doesn't tell anyone what to build, how to build it, or when to build it. It defines the boundary conditions on human action within a Rocket — what you cannot do and still be operating within the system. Everything else is up to you.
-
-This isn't a metaphor. It's the core design principle. The protocol is a set of simple rules that create the conditions for complex, emergent behaviour: products, services, and solutions that no one necessarily planned in advance. Projects like ZeroMQ have proven that valuable software can evolve from simple rules with no upfront planning or leadership. Nostrocket applies the same principle to entire organizations.
-
-The protocol's fitness function — the thing it optimizes for — is **increasing the number of Participants**. The first thing a reader might think is: "but a system needs profit, not just users." This is true. But blindly chasing profit has disastrous consequences — it's how you end up with the same extractive, parasitic structures we're trying to replace.
-
-By optimizing for participation, we ensure that profitability actually serves the interests of participants and, by extension, the rest of humanity. A Rocket that generates profit but repels contributors is dying. A Rocket that attracts contributors is, by definition, solving problems people care about — and that is the foundation of sustainable profit. The two aren't in tension; participation is just the more honest measure. With that foundation, let's examine the structural principle that makes this possible.
+With that foundation, let's examine the structural principles that make this possible.
 
 ---
 
@@ -32,41 +26,69 @@ By optimizing for participation, we ensure that profitability actually serves th
 
 Most organizations slow down as they grow. This isn't a people problem — it's a structural one, described by Amdahl's Law.
 
-Amdahl's Law is a formula from computing that describes the maximum speedup you can get by adding more processors to a task. The formula is simple: if any fraction of the work must be done sequentially — one step at a time, with everything else waiting — then that fraction creates a hard ceiling on how much parallelism can help, no matter how many processors you throw at it.
+Amdahl's Law is a formula from computer science that describes the maximum speedup you can get by executing a task with more processors (or threads). The formula is simple: if any fraction of the work must be done sequentially (one step at a time), then that fraction creates a hard ceiling on how much speedup you get by adding more processors.
 
-The math is unforgiving. If 5% of a task is sequential, your maximum speedup is 20× — even with a thousand processors. Raise that to 25% sequential and the ceiling drops to 4×. At 50%, it's 2×. The rest of your processing capacity sits idle, doing nothing.
+The math is unforgiving. If 5% of a task is sequential, adding more than 20 processors gives you no additional speedup. Raise that to 25% sequential and the ceiling drops to 4. At 50%, it's 2. Any extra processing capacity sits idle, doing nothing.
 
-Human organizations follow the same law. People are the processors. Every meeting, approval chain, code review, and planning session is a sequential operation — a mutex. In a typical company, employees spend 20–30% of their time in some form of sequential operation. Amdahl's Law caps the effective speedup at 3–5× regardless of how many people you add to the team. Amazon's "two pizza rule" is a practical admission of this ceiling.
+Human organizations follow the same law. People are the processors. Every meeting, approval chain, code review, and planning session is a sequential operation or "mutex". In a typical company, employees spend 20–30% of their time in some form of mutex. Amdahl's Law caps the effective team size at 3-5. You can add more people to the team, but this just increases costs and does not increase meaningful output. Amazon's "two pizza rule" is a practical admission of this ceiling.
 
-Nostrocket is designed to be "mutexless" — a structure where no one needs permission or agreement to do productive work. As the serial fraction approaches zero, the limit on team size approaches infinity.
+Nostrocket is designed to be "mutexless" — a structure where there's no leadership to wait for, no meetings, no one *needs* permission or upfront agreement to do productive work. As the serial fraction approaches zero, the limit on team size approaches infinity.
 
-A contributor who abides by the rules identifies a problem, solves it, and submits the solution, which is merged into production — without waiting for anyone, without asking, without coordinating. The protocol's boundary conditions ensure independent work converges toward something coherent. As Alan Watts put it: "The river is not pushed from behind, nor is it pulled from ahead. It falls with gravity."
+A contributor identifies a problem, solves it, and submits the solution. If they didn't violate the protocol, their patch is merged. No coordination, planning, or consensus is required. The unprotocol's boundary conditions ensure independent work converges toward something coherent. As Alan Watts put it: "The river is not pushed from behind, nor is it pulled from ahead. It falls with gravity."
 
 The next question is: what motivates people to participate?
 
 ---
 
-## Self-Interest as the Engine
+## Sovereign Self-Interest as the Engine
 
 Human action within Nostrocket must be executed for purely self-interested reasons. This is not a concession to human nature — it is a design requirement.
 
-When people solve problems because they genuinely care about the problem, the solutions are more accurate than when they're doing it because someone else is managing their priorities. The difference between organic Wikipedia contributions and paid ones illustrates this clearly. Self-interested action is more efficient, more accurate, more scalable, and minimizes the social attack surface — there's nothing to corrupt if no one is directing anyone.
+When people solve problems because they genuinely care about the problem, the solutions are more accurate than when they're doing it because someone else is managing their priorities. The difference between organic Wikipedia contributions and paid ones illustrates this clearly.
 
-The protocol creates the conditions where self-interest and collective benefit are aligned: solve a real problem, get equity. Your equity becomes more valuable as the project succeeds and people pay to consume its products/services. No one needs to be altruistic.
+Self-interested action is more efficient, more accurate, more scalable, and minimizes the social attack surface — there's nothing to corrupt if no one is directing anyone.
 
-The Daoists called this quality *ziran*: things unfolding according to their own nature without external compulsion. The boundary conditions channel self-interest into productive work the same way water creates a riverbank that channels more water. The *Dao De Jing* describes the ideal result: "Perform actions, accomplish deeds; the people will say it happened naturally." Building on this principle, let's look at the two technical layers that make the system work.
+The unprotocol creates the conditions where self-interest and collective benefit are aligned: solve a real problem, get equity. Your equity becomes more valuable as the project succeeds and people pay to consume its products/services. No one needs to be altruistic.
+
+The Daoists called this quality *ziran*: things unfolding according to their own nature without external compulsion. 
+
+The boundary conditions channel self-interest into productive work the same way water creates a riverbank that channels more water. The *Dao De Jing* describes the ideal result: "Perform actions, accomplish deeds; the people will say it happened naturally." 
 
 ---
 
-## The Two Layers: Bitcoin and Nostr
+## Votepower
+
+Votepower is Nostrocket's governance mechanism and is a quantification of "skin in the game". We'll discuss exactly how it works later in this chapter, but here's what votepower can actually do:
+
+1) approve or reject merit requests (converting work to equity),
+2) add or remove Maintainers (the people who merge code). 
+That's it.
+
+Governance is narrow by design. Votepower doesn't direct strategy, assign work, set priorities, allocate funds, or tell anyone what to build. 
+
+Now let's look at the two technical layers that make the system work.
+
+---
+
+## A Tale of Two Layers: Bitcoin and Nostr
 
 Nostrocket runs on two systems that do very different jobs.
 
-**Nostr** handles everything humans need to coordinate: posting and discussing problems, avoiding duplicated work, arguing about things. Nostr is a decentralized social protocol — no one owns it, no one can censor it, and anyone can run a relay. All the messy, creative, argumentative, human parts of building things happen here.
+**Nostr** handles everything humans need to coordinate: posting and discussing problems, avoiding duplicated work, arguing about things. 
 
-**A Bitcoin sidechain** handles only what every participant in a Rocket — contributors, merit holders, and customers — must agree on in order to continue operating. A customer needs to know what Bitcoin address to pay. Merit holders need to agree on who holds how many merits. Everyone needs to agree on votepower so that votes on merit requests produce the same result no matter who calculates it. If disagreement on a piece of state would prevent the Rocket from functioning, it goes on the sidechain. If the Rocket can still function without it, it stays on Nostr.
+Nostr is a decentralized social unprotocol — no one owns it, no one can censor it, and anyone can run a relay. All the messy, creative, argumentative, human parts of building things happen here.
 
-The sidechain layer is deliberately minimal. Consensus is expensive — every piece of data that requires Bitcoin-grade agreement slows everything down. The problem graph, discussions, code patches — these need to be public, have proof of provenance, and be censorship resistant. Nostr is adequate for this. But merit balances, votepower, revenue distribution addresses, and the votes on merit requests themselves — those require consensus over global state.
+**A Bitcoin sidechain** handles only what every participant in a Rocket (contributors, merit holders, and paying customers) must agree on in order to continue operating. 
+
+A customer needs to know what Bitcoin address to pay. Merit holders need to agree on who holds how many merits. Everyone needs to agree on votepower so that votes on merit requests produce the same result no matter who calculates it. 
+
+If uncertainty over a given piece of state would prevent the Rocket from functioning, it goes on the sidechain. If the Rocket can still function without it, it stays on Nostr.
+
+The sidechain layer is deliberately minimal. Consensus is expensive and sometimes retarded — every piece of data that requires Bitcoin-grade agreement slows everything down. 
+
+The problem graph, discussions, code patches, etc need to be public, have proof of provenance, and be censorship resistant. Nostr is adequate for this. 
+
+Merit balances, votepower, revenue distribution, and the votes on merit requests themselves require consensus over global state.
 
 ```mermaid
 graph LR
@@ -83,9 +105,15 @@ graph LR
     PR -.->|"Work complete"| MR
 ```
 
-Each layer has its own anti-spam mechanism. On Nostr, the web of trust filters who can participate in the problem graph. On the sidechain, a proof-of-work system gates first transactions from new accounts, while merit ownership gates all subsequent transactions.
+Each layer has its own anti-spam mechanism. On Nostr, the web of trust determines who's content is visible. 
 
-The sidechain also enforces multi-timeframe rate limiting: transaction growth is capped across multiple time windows (minute, hour, day, week), and as utilization approaches the cap, the required proof-of-work difficulty increases exponentially. Organic growth is accommodated while spam attacks become prohibitively expensive — an attacker might briefly spike the one-minute window, but the hourly and weekly rate limits quickly throttle any sustained assault. Having established the infrastructure, let's turn to the organizational unit that runs on top of it.
+On the sidechain, a proof-of-work system gates initial transactions from new accounts, while merit ownership gates all subsequent transactions.
+
+The sidechain also enforces multi-timeframe rate limiting: transaction growth is capped across multiple time windows (minute, hour, day, week), and as utilization approaches the cap, the required proof-of-work difficulty increases exponentially. 
+
+Organic growth is accommodated while spam attacks become prohibitively expensive — an attacker might briefly spike the one-minute window, but the hourly and weekly rate limits quickly throttle any sustained assault. 
+
+Having established the infrastructure, let's turn to the organizational unit that runs on top of it.
 
 ---
 
@@ -93,13 +121,17 @@ The sidechain also enforces multi-timeframe rate limiting: transaction growth is
 
 A Rocket is a project. Anyone can create one.
 
-But creating a Rocket isn't filing paperwork — it's doing actual work. The founder builds something meaningful first, then creates the Rocket and approves their own initial merit request. Technically, a Rocket is instantiated with a single merit — this is the only way to bootstrap the voting process, since approving merit requests requires existing votepower. The founder's initial merit request establishes the first real stake.
+But creating a Rocket isn't filing paperwork — it's doing actual work. The founder builds something meaningful first, then creates the Rocket and approves their own initial merit request. 
 
-Why doesn't this get abused? Because a Rocket with an inflated founding merit request is dead on arrival. No competent person will contribute to a project where the founder gave themselves an unfair share of equity for minimal work. The standard to compare against is Bitcoin itself — a system where the creator received no special allocation, mined under the same rules as everyone else, and let the work speak for itself. A founder who wants to attract serious contributors needs to demonstrate that same integrity.
+Technically, a Rocket is instantiated with a single merit — this is the only way to bootstrap the voting process, since approving merit requests requires existing votepower. The founder's initial merit request establishes the first real stake.
+
+Why doesn't this get abused? Because Rockets are competing for contributors. A Rocket with an inflated founding merit request is dead on arrival. No competent person will contribute to a project where the founder gave themselves an unfair share of equity for minimal work. 
+
+The standard to compare against is Bitcoin itself — a system where the creator received no special allocation, mined under the same rules as everyone else, and let the work speak for itself. A founder who wants to attract serious contributors needs to demonstrate that same integrity.
 
 ### Example: Bootstrapping a Rocket
 
-Say a developer builds a Bitcoin payment widget. She creates a Rocket called "PayFlow" and approves her own first merit request for 100,000 sats — roughly a day's work at market rates. She's now the first merit holder and Maintainer. Others can find problems in PayFlow's problem graph, solve them, and request their own merits. If she'd claimed 10,000,000 sats for that first day of work, no serious developer would touch the project.
+Say a developer builds a Cashu payment widget. She creates a Rocket called "PayFlow" and approves her own first merit request for 1,000,000 sats — roughly a day's work at market rates. She's now the first merit holder and Maintainer. Others can find problems in PayFlow's implementation or user experience, solve them, and request their own merits. If she'd claimed 100,000,000 sats for that first day of work, no serious developer would touch the project.
 
 The founder also becomes the first Maintainer — the person with permission to merge code and enforce quality standards. More on that below.
 
@@ -109,7 +141,7 @@ Each Rocket has its own independent merit system — its own merit supply, its o
 
 **Cross-ownership:** Rockets can hold merits in other Rockets. If Rocket A builds something that Rocket B uses, Rocket B's merit holders might approve a merit grant to Rocket A. This creates economic alignment across the ecosystem without requiring any central coordination.
 
-**The Root Rocket:** The foundational Rocket — Nostrocket itself — builds and maintains the protocol infrastructure. It generates revenue by receiving merits from other Rockets that use the infrastructure. Like the ocean in the *Dao De Jing* that masters all streams by staying below them, the Root Rocket leads the ecosystem by serving it. This creates a powerful alignment: the Root Rocket's revenue depends on the success of every Rocket built on its infrastructure. It's incentivized to make the infrastructure as good as possible — not to extract rent, but to make every other Rocket more profitable, because their revenue flows back as merits.
+**The Root Rocket:** The foundational Rocket — Nostrocket itself — builds and maintains the unprotocol infrastructure. It generates revenue by receiving merits from other Rockets that use the infrastructure. Like the ocean in the *Dao De Jing* that masters all streams by staying below them, the Root Rocket leads the ecosystem by serving it. This creates a powerful alignment: the Root Rocket's revenue depends on the success of every Rocket built on its infrastructure. It's incentivized to make the infrastructure as good as possible — not to extract rent, but to make every other Rocket more profitable, because their revenue flows back as merits.
 
 **Cross-Rocket merit requests:** When a solution benefits multiple Rockets — say, a shared payment processing library — the contributor can request merits from each Rocket independently. Each Rocket's merit holders vote separately on whether the work was valuable to them. A solution rejected by one Rocket's merit holders might still be approved by another's.
 
@@ -336,7 +368,7 @@ Beyond the critical path test, merit holders should blackball a merit request if
 - The solution could harm Bitcoin, users, or participants.
 - The problem isn't relevant to the Rocket itself.
 
-The incentives here are self-correcting. Approve bad work and you dilute your own equity with worthless contributions. Reject good work and talented contributors leave for other Rockets — or fork yours. If merit holders with votepower reject merit requests that comply with the protocol and claim reasonable amounts, contributors will see this and stop working. The Rocket will die or be forked. The system punishes dishonesty in both directions. Moving on from how decisions are made, let's look at who controls quality at the code level.
+The incentives here are self-correcting. Approve bad work and you dilute your own equity with worthless contributions. Reject good work and talented contributors leave for other Rockets — or fork yours. If merit holders with votepower reject merit requests that comply with the unprotocol and claim reasonable amounts, contributors will see this and stop working. The Rocket will die or be forked. The system punishes dishonesty in both directions. Moving on from how decisions are made, let's look at who controls quality at the code level.
 
 ---
 
@@ -363,7 +395,7 @@ The web of trust is a social graph — real humans vouching for other real human
 This serves two purposes:
 
 1. **Sybil resistance.** You can't spin up a hundred accounts and game the system if each account requires a real human vouching for a real human.
-2. **Spam prevention.** If you're not in the web of trust, your Nostr events are ignored by the protocol. This keeps the signal-to-noise ratio high without requiring centralized moderation.
+2. **Spam prevention.** If you're not in the web of trust, your Nostr events are ignored by the unprotocol. This keeps the signal-to-noise ratio high without requiring centralized moderation.
 
 The web of trust only gates the social layer — posting problems, discussions, and solutions. The Bitcoin sidechain has its own defense: proof-of-work for first transactions from accounts with zero merits, and merit ownership gating all subsequent transactions. Once you hold merits in any Rocket, you've proven you're not a spammer — someone's votepower approved your work.
 
@@ -385,9 +417,9 @@ This is what makes Nostrocket fundamentally different from a company. In a compa
 
 ---
 
-## Summary: The Protocol in One Page
+## Summary: The unprotocol in One Page
 
-The protocol optimizes for one thing: increasing the number of Participants. Profit follows naturally — a Rocket that attracts contributors is solving real problems, and real problems are the foundation of sustainable revenue.
+The unprotocol optimizes for one thing: increasing the number of Participants. Profit follows naturally — a Rocket that attracts contributors is solving real problems, and real problems are the foundation of sustainable revenue.
 
 1. **A founder creates a Rocket** by doing meaningful work and approving their own first merit request against an initial bootstrap merit.
 2. **Problems are posted** as specific, falsifiable observations — not feature requests, not wishes. They form a directed acyclic graph where problems can have multiple parents. Large problems are decomposed into children solvable in under a day. Problems must be relevant to the Rocket itself.
@@ -401,10 +433,10 @@ The protocol optimizes for one thing: increasing the number of Participants. Pro
 10. **Rockets are independent but connected.** Each has its own merit system and revenue. Rockets can hold merits in other Rockets. The Root Rocket provides infrastructure and earns merits across the ecosystem.
 11. **Forking is the ultimate accountability.** If the system breaks, someone forks and starts fresh.
 
-You now have a complete picture of the protocol's mechanics. The Nostr layer handles human coordination. The Bitcoin sidechain handles the shared truth that everyone must agree on to keep operating. The boundary conditions channel self-interested human action into productive work. Everything else emerges — or as Ursula Le Guin rendered *wu wei*: "doing without doing, uncompetitive, unworried, trustful accomplishment, power that is not force."
+You now have a complete picture of the unprotocol's mechanics. The Nostr layer handles human coordination. The Bitcoin sidechain handles the shared truth that everyone must agree on to keep operating. The boundary conditions channel self-interested human action into productive work. Everything else emerges — or as Ursula Le Guin rendered *wu wei*: "doing without doing, uncompetitive, unworried, trustful accomplishment, power that is not force."
 
 ---
 
 ## What's Next
 
-With the protocol laid out, the next step is to examine each component's implementation in detail — starting with the problem graph specification and the sidechain consensus rules.
+With the unprotocol laid out, the next step is to examine each component's implementation in detail — starting with the problem graph specification and the sidechain consensus rules.

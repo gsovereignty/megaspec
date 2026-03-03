@@ -16,9 +16,10 @@ const TEMPLATE_FILES = [
   'reference.md',
   'guide.md',
   'whitepaper.md',
+  'religious-text.md',
 ];
 
-const CONTENT_TYPES = ['tutorial', 'guide', 'reference', 'whitepaper'] as const;
+const CONTENT_TYPES = ['tutorial', 'guide', 'reference', 'whitepaper', 'religious-text'] as const;
 type ContentType = (typeof CONTENT_TYPES)[number];
 type InteractionMode = 'interview' | 'transform';
 
@@ -43,6 +44,7 @@ agents:
 - reference
 - guide
 - whitepaper
+- religious-text
 `;
 
 export interface InitAnswers {
@@ -130,6 +132,7 @@ agents:
 - reference
 - guide
 - whitepaper
+- religious-text
 `;
 }
 
@@ -230,6 +233,7 @@ export async function promptUser(): Promise<InitAnswers> {
       { name: 'Guide — practical how-to with examples', value: 'guide' },
       { name: 'Reference — structured lookup documentation', value: 'reference' },
       { name: 'Whitepaper — in-depth analysis with evidence', value: 'whitepaper' },
+      { name: 'Religious Text — scripture study, exegesis, and reflection', value: 'religious-text' },
     ],
   });
 

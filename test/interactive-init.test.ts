@@ -238,8 +238,8 @@ describe('scaffold with interactive answers', () => {
     expect(fs.existsSync(path.join(tmpDir, 'docflow', 'AGENTS.md'))).toBe(
       true,
     );
-    // 11 standard items + drafts/<slug>/ + PROMPT.md = 13
-    expect(result.created.length).toBe(13);
+    // 12 standard items + drafts/<slug>/ + PROMPT.md = 14
+    expect(result.created.length).toBe(14);
   });
 
   it('is idempotent — second run skips interactive artifacts', () => {
@@ -287,6 +287,6 @@ describe('scaffold without answers (non-interactive)', () => {
 
   it('creates exactly 11 items (same as before)', () => {
     const result = scaffold(tmpDir);
-    expect(result.created.length).toBe(11);
+    expect(result.created.length).toBe(12);
   });
 });

@@ -1,6 +1,6 @@
 import type { Diagnostic } from '../validators/types.js';
 
-const VALID_TYPES = ['tutorial', 'reference', 'guide', 'whitepaper'] as const;
+const VALID_TYPES = ['tutorial', 'reference', 'guide', 'whitepaper', 'religious-text'] as const;
 const VALID_AUDIENCES = ['beginner', 'intermediate', 'advanced'] as const;
 
 export type ContentType = (typeof VALID_TYPES)[number];

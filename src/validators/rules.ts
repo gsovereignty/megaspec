@@ -712,6 +712,7 @@ registerRule('DF-050', (ctx: ValidationContext): Diagnostic[] => {
     reference: 10,
     guide: 10,
     whitepaper: 12,
+    'religious-text': 10,
   };
   const target = targets[ctx.contentType] ?? 10;
 

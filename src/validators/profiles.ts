@@ -149,11 +149,31 @@ export const whitepaperProfile: ValidationProfile = {
   ],
 };
 
+export const religiousTextProfile: ValidationProfile = {
+  name: 'religious-text',
+  fleschKincaidTarget: 10,
+  passiveVoiceThreshold: 0.3, // Slightly relaxed for liturgical/formal register
+  rules: [
+    ...commonRules(),
+    { ruleId: RULE_IDS.OPENING_HOOK, severity: 'FAIL', rule: () => [] },
+    { ruleId: RULE_IDS.EXAMPLE_PRESENCE, severity: 'WARN', rule: () => [] },
+    { ruleId: RULE_IDS.QUESTION_BEFORE_ANSWER, severity: 'WARN', rule: () => [] },
+    { ruleId: RULE_IDS.NEXT_STEPS, severity: 'WARN', rule: () => [] },
+    { ruleId: RULE_IDS.TRANSITIONS, severity: 'WARN', rule: () => [] },
+    { ruleId: RULE_IDS.NARRATIVE_ARC, severity: 'WARN', rule: () => [] },
+    { ruleId: RULE_IDS.FLESCH_KINCAID, severity: 'WARN', rule: () => [] },
+    { ruleId: RULE_IDS.PASSIVE_VOICE, severity: 'WARN', rule: () => [] },
+    { ruleId: RULE_IDS.READER_FOCUS, severity: 'WARN', rule: () => [] },
+    { ruleId: RULE_IDS.VISUAL_DENSITY, severity: 'WARN', rule: () => [] },
+  ],
+};
+
 const profiles: Record<ContentType, ValidationProfile> = {
   tutorial: tutorialProfile,
   reference: referenceProfile,
   guide: guideProfile,
   whitepaper: whitepaperProfile,
+  'religious-text': religiousTextProfile,
 };
 
 export function getProfile(contentType: ContentType): ValidationProfile {

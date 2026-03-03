@@ -115,7 +115,7 @@ function scoreClarity(ctx: ScoringContext): DimensionScore {
   let points = 0;
 
   // FK score (up to 40)
-  const targets: Record<string, number> = { tutorial: 8, reference: 10, guide: 10, whitepaper: 12 };
+  const targets: Record<string, number> = { tutorial: 8, reference: 10, guide: 10, whitepaper: 12, 'religious-text': 10 };
   const target = targets[ctx.contentType] ?? 10;
   if (fk <= target) {
     points += 40;
