@@ -48,6 +48,15 @@ const RULE_IDS = {
 
   // LLM artifact detection
   LLM_ARTIFACTS: 'DF-091',
+
+  // Mind virus / replicative fitness (religious-text)
+  MEMETIC_LIFECYCLE: 'DF-070',
+  TRANSMISSION_COMPULSION: 'DF-071',
+  HOOK_PAYLOAD_ALIGNMENT: 'DF-072',
+  EPISTEMIC_ARMOR_VISIBILITY: 'DF-073',
+  IDENTITY_ARCHITECTURE: 'DF-074',
+  DEEP_STRUCTURE: 'DF-075',
+  ENVIRONMENTAL_FEEDBACK: 'DF-076',
 } as const;
 
 // Common rules shared across all profiles
@@ -165,6 +174,14 @@ export const religiousTextProfile: ValidationProfile = {
     { ruleId: RULE_IDS.PASSIVE_VOICE, severity: 'WARN', rule: () => [] },
     { ruleId: RULE_IDS.READER_FOCUS, severity: 'WARN', rule: () => [] },
     { ruleId: RULE_IDS.VISUAL_DENSITY, severity: 'WARN', rule: () => [] },
+    // Mind virus / replicative fitness rules
+    { ruleId: RULE_IDS.MEMETIC_LIFECYCLE, severity: 'WARN', rule: () => [] },
+    { ruleId: RULE_IDS.TRANSMISSION_COMPULSION, severity: 'WARN', rule: () => [] },
+    { ruleId: RULE_IDS.HOOK_PAYLOAD_ALIGNMENT, severity: 'WARN', rule: () => [] },
+    { ruleId: RULE_IDS.EPISTEMIC_ARMOR_VISIBILITY, severity: 'WARN', rule: () => [] },
+    { ruleId: RULE_IDS.IDENTITY_ARCHITECTURE, severity: 'WARN', rule: () => [] },
+    { ruleId: RULE_IDS.DEEP_STRUCTURE, severity: 'WARN', rule: () => [] },
+    { ruleId: RULE_IDS.ENVIRONMENTAL_FEEDBACK, severity: 'WARN', rule: () => [] },
   ],
 };
 

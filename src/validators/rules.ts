@@ -1073,6 +1073,310 @@ registerRule('DF-059', (ctx: ValidationContext): Diagnostic[] => {
 });
 
 // ---------------------------------------------------------------------------
+// Mind Virus / Replicative Fitness rules (DF-070 – DF-076)
+// Religious-text / mind-virus specific structural validation
+// ---------------------------------------------------------------------------
+
+// DF-070: Memetic lifecycle coverage
+// Every mind virus must survive four stages: Assimilation, Retention, Expression, Transmission
+registerRule('DF-070', (ctx: ValidationContext): Diagnostic[] => {
+  if (ctx.contentType !== 'religious-text') return [];
+  const diagnostics: Diagnostic[] = [];
+  const text = stripCodeBlocks(ctx.content).toLowerCase();
+
+  // Assimilation — attention capture in opening
+  const words = ctx.content.split(/\s+/).filter((w) => w.length > 0);
+  const first200 = words.slice(0, 200).join(' ').toLowerCase();
+  const hasAssimilation =
+    first200.includes('?') ||
+    /\b(behold|hear|listen|woe|arise|lo|verily|truly)\b/.test(first200) ||
+    /\b(fear|threat|danger|death|life|eternal)\b/.test(first200);
+
+  if (!hasAssimilation) {
+    diagnostics.push({
+      ruleId: 'DF-070',
+      severity: 'WARN',
+      line: 1,
+      message: 'Memetic lifecycle: Assimilation stage weak. Opening lacks an attention-capturing hook (question, invocation, or emotional trigger).',
+      research: 'RF-04',
+    });
+  }
+
+  // Retention — memorable structures (repetition, parallelism, vocabulary)
+  const hasRepetition = /(\b\w{4,}\b).*\1.*\1/s.test(text);
+  const hasVocabulary = /\b(?:means|refers to|is defined as|signifies|called|known as)\b/.test(text);
+  if (!hasRepetition && !hasVocabulary) {
+    diagnostics.push({
+      ruleId: 'DF-070',
+      severity: 'WARN',
+      line: 0,
+      message: 'Memetic lifecycle: Retention stage weak. Text lacks memorable devices (repetition, introduced vocabulary, or mnemonic structures).',
+      research: 'RF-05',
+    });
+  }
+
+  // Expression — the text must give readers language to use
+  const expressionMarkers = [
+    'remember', 'tell', 'share', 'say', 'proclaim', 'declare',
+    'let your', 'speak', 'teach', 'pass on', 'hand down',
+  ];
+  if (!expressionMarkers.some((m) => text.includes(m))) {
+    diagnostics.push({
+      ruleId: 'DF-070',
+      severity: 'WARN',
+      line: 0,
+      message: 'Memetic lifecycle: Expression stage weak. Text provides no activation language for readers to retrieve and communicate the idea.',
+      research: 'RF-04',
+    });
+  }
+
+  // Transmission — explicit or implicit propagation imperative
+  const transmissionMarkers = [
+    'go and', 'spread', 'tell others', 'make disciples',
+    'bear witness', 'testify', 'evangelize', 'preach',
+    'teach all nations', 'every creature', 'the word must',
+  ];
+  if (!transmissionMarkers.some((m) => text.includes(m))) {
+    diagnostics.push({
+      ruleId: 'DF-070',
+      severity: 'WARN',
+      line: 0,
+      message: 'Memetic lifecycle: Transmission stage weak. Text lacks a propagation imperative (native sharing impulse or commission).',
+      research: 'RF-04',
+    });
+  }
+
+  return diagnostics;
+});
+
+// DF-071: Transmission compulsion — native sharing imperative
+registerRule('DF-071', (ctx: ValidationContext): Diagnostic[] => {
+  if (ctx.contentType !== 'religious-text') return [];
+  const text = stripCodeBlocks(ctx.content).toLowerCase();
+
+  const nativeImperatives = [
+    'must', 'shall', 'command', 'compel', 'duty', 'obligation',
+    'cannot be silent', "can't stay silent", 'woe to me if',
+    'the word burns', 'fire in my bones', 'constrained',
+  ];
+  const externalImperatives = [
+    'share this', 'repost', 'forward this', 'send to',
+    'click here', 'subscribe',
+  ];
+
+  const nativeHits = nativeImperatives.filter((p) => text.includes(p)).length;
+  const externalHits = externalImperatives.filter((p) => text.includes(p)).length;
+
+  const diagnostics: Diagnostic[] = [];
+
+  if (nativeHits === 0) {
+    diagnostics.push({
+      ruleId: 'DF-071',
+      severity: 'WARN',
+      line: 0,
+      message: 'Text lacks a native transmission imperative. The sharing compulsion should emerge from the content itself, not from external instructions.',
+      research: 'RF-04',
+    });
+  }
+
+  if (externalHits > 0) {
+    diagnostics.push({
+      ruleId: 'DF-071',
+      severity: 'WARN',
+      line: 0,
+      message: `Text uses ${externalHits} external sharing instruction(s) (e.g., "share this"). Native imperatives (moral obligation, warning frames) are more potent than bolted-on calls to action.`,
+      research: 'RF-04',
+    });
+  }
+
+  return diagnostics;
+});
+
+// DF-072: Hook-payload alignment
+// The emotional tone of the hook must match the payload
+registerRule('DF-072', (ctx: ValidationContext): Diagnostic[] => {
+  if (ctx.contentType !== 'religious-text') return [];
+  const text = stripCodeBlocks(ctx.content);
+  const words = text.split(/\s+/).filter((w) => w.length > 0);
+  if (words.length < 400) return []; // Too short to measure mismatch
+
+  const first200 = words.slice(0, 200).join(' ').toLowerCase();
+  const rest = words.slice(200).join(' ').toLowerCase();
+
+  // Measure emotional intensity in hook vs payload
+  const emotionalWords = [
+    'fear', 'death', 'love', 'hope', 'wrath', 'joy', 'terror',
+    'glory', 'blessing', 'curse', 'salvation', 'destruction',
+    'mercy', 'judgement', 'peace', 'war', 'eternal', 'hell', 'heaven',
+  ];
+
+  const hookIntensity = emotionalWords.filter((w) => first200.includes(w)).length;
+  const payloadIntensity = emotionalWords.filter((w) => rest.includes(w)).length;
+
+  // If hook is highly emotional but payload is flat, or vice versa
+  if (hookIntensity >= 4 && payloadIntensity <= 1) {
+    return [{
+      ruleId: 'DF-072',
+      severity: 'WARN',
+      line: 1,
+      message: 'Hook-payload mismatch. The opening is highly emotional but the payload is flat. Readers will feel bait-and-switched.',
+      research: 'RF-04',
+    }];
+  }
+  if (hookIntensity <= 1 && payloadIntensity >= 5) {
+    return [{
+      ruleId: 'DF-072',
+      severity: 'WARN',
+      line: 1,
+      message: 'Hook-payload mismatch. The opening is flat but the payload is emotionally intense. The hook may fail to capture attention before the payload can land.',
+      research: 'RF-04',
+    }];
+  }
+
+  return [];
+});
+
+// DF-073: Epistemic armor visibility
+// Defense mechanisms must feel explanatory, not defensive
+registerRule('DF-073', (ctx: ValidationContext): Diagnostic[] => {
+  if (ctx.contentType !== 'religious-text') return [];
+  const text = stripCodeBlocks(ctx.content).toLowerCase();
+
+  const obviousDefense = [
+    "don't listen to", "don't believe", 'ignore anyone who',
+    'they are lying', 'all critics are', 'never question',
+    'do not question', 'questioning is forbidden',
+  ];
+
+  const diagnostics: Diagnostic[] = [];
+  const rawLines = ctx.content.split('\n');
+
+  for (const phrase of obviousDefense) {
+    if (text.includes(phrase)) {
+      let line = 0;
+      for (let i = 0; i < rawLines.length; i++) {
+        if (rawLines[i].toLowerCase().includes(phrase)) {
+          line = i + 1;
+          break;
+        }
+      }
+      diagnostics.push({
+        ruleId: 'DF-073',
+        severity: 'WARN',
+        line,
+        message: `Visible epistemic armor detected ("${phrase}"). Defense mechanisms should feel like accurate descriptions of reality, not pre-programmed defensive instructions.`,
+        research: 'RF-04',
+      });
+    }
+  }
+
+  return diagnostics;
+});
+
+// DF-074: Identity architecture — in-group/out-group structure
+registerRule('DF-074', (ctx: ValidationContext): Diagnostic[] => {
+  if (ctx.contentType !== 'religious-text') return [];
+  const text = stripCodeBlocks(ctx.content).toLowerCase();
+
+  const diagnostics: Diagnostic[] = [];
+
+  // Must have in-group language
+  const inGroupMarkers = ['we', 'us', 'our', 'brethren', 'brothers', 'sisters', 'the faithful', 'the elect', 'children of'];
+  const hasInGroup = inGroupMarkers.some((m) => text.includes(m));
+
+  // Must have transformation narrative
+  const transformMarkers = [
+    'born again', 'new creation', 'transformed', 'renewed', 'converted',
+    'awakened', 'once was', 'now', 'before', 'after', 'no longer', 'made new',
+  ];
+  const hasTransform = transformMarkers.filter((m) => text.includes(m)).length >= 2;
+
+  if (!hasInGroup) {
+    diagnostics.push({
+      ruleId: 'DF-074',
+      severity: 'WARN',
+      line: 0,
+      message: 'Text lacks in-group identity markers. Religious texts need shared vocabulary, community language ("we", "us", "brethren") to build identity binding.',
+      research: 'RF-04',
+    });
+  }
+
+  if (!hasTransform) {
+    diagnostics.push({
+      ruleId: 'DF-074',
+      severity: 'WARN',
+      line: 0,
+      message: 'Text lacks a transformation narrative (before/after discontinuity). Identity binding requires the reader to experience a change that creates an identity stake.',
+      research: 'RF-04',
+    });
+  }
+
+  return diagnostics;
+});
+
+// DF-075: Deep structure / surface content separation
+registerRule('DF-075', (ctx: ValidationContext): Diagnostic[] => {
+  if (ctx.contentType !== 'religious-text') return [];
+  const text = stripCodeBlocks(ctx.content).toLowerCase();
+
+  const universalPatterns = [
+    ['danger', 'threat', 'protect', 'survive'],
+    ['betray', 'trust', 'deceive', 'loyalty'],
+    ['purpose', 'meaning', 'destiny', 'plan'],
+    ['truth', 'wisdom', 'knowledge', 'understanding'],
+    ['lose', 'lost', 'forfeit', 'regret'],
+    ['community', 'family', 'tribe', 'people'],
+    ['unclean', 'impure', 'corrupt', 'defile'],
+    ['honor', 'glory', 'worthy', 'chosen'],
+  ];
+
+  let patternsHit = 0;
+  for (const group of universalPatterns) {
+    if (group.some((kw) => text.includes(kw))) patternsHit++;
+  }
+
+  if (patternsHit < 3) {
+    return [{
+      ruleId: 'DF-075',
+      severity: 'WARN',
+      line: 0,
+      message: `Text maps to only ${patternsHit}/8 universal psychological patterns (threat, betrayal, meaning, truth, loss, loyalty, purity, status). Aim for ≥3 to improve cross-cultural adaptability.`,
+      research: 'RF-04',
+    }];
+  }
+  return [];
+});
+
+// DF-076: Environmental feedback loop
+registerRule('DF-076', (ctx: ValidationContext): Diagnostic[] => {
+  if (ctx.contentType !== 'religious-text') return [];
+  const text = stripCodeBlocks(ctx.content).toLowerCase();
+
+  const urgencyMarkers = [
+    'now is the time', 'the hour has come', 'today is the day',
+    'time is short', 'the day is near', 'do not delay',
+  ];
+  const hasUrgency = urgencyMarkers.some((m) => text.includes(m));
+
+  const selfSustainMarkers = [
+    'every day', 'daily', 'continual', 'eternal', 'generation to generation',
+    'forevermore', 'until the end', 'without ceasing',
+  ];
+  const hasSelfSustain = selfSustainMarkers.some((m) => text.includes(m));
+
+  if (!hasUrgency && !hasSelfSustain) {
+    return [{
+      ruleId: 'DF-076',
+      severity: 'WARN',
+      line: 0,
+      message: 'Text lacks an internal urgency mechanism or self-sustaining temporal frame. Without either, the text depends entirely on external crisis conditions to remain relevant.',
+      research: 'RF-04',
+    }];
+  }
+  return [];
+});
+
+// ---------------------------------------------------------------------------
 // LLM Artifact Detection (DF-091)
 // ---------------------------------------------------------------------------
 

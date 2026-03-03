@@ -4,10 +4,17 @@ import * as path from 'node:path';
 import { parseMarkdown } from '../utils/markdown.js';
 import type { ContentType } from '../utils/front-matter.js';
 import { computeEngagementScore, type ScoringContext } from '../scoring/engagement.js';
+import { computeReplicativeFitness, type FitnessContext } from '../scoring/replicative-fitness.js';
 import { output, outputError, type OutputContext } from '../utils/output-context.js';
 
 function scoreBar(score: number, width: number = 20): string {
   const filled = Math.round((score / 100) * width);
+  const empty = width - filled;
+  return '█'.repeat(filled) + '░'.repeat(empty);
+}
+
+function fitnessBar(score: number, max: number = 4, width: number = 15): string {
+  const filled = Math.round((score / max) * width);
   const empty = width - filled;
   return '█'.repeat(filled) + '░'.repeat(empty);
 }
@@ -43,8 +50,23 @@ export function registerMetricsCommand(
 
         const score = computeEngagementScore(scoringCtx);
 
+        // Compute replicative fitness for religious-text / mind-virus content
+        let fitness = null;
+        if (contentType === 'religious-text') {
+          const fitnessCtx: FitnessContext = {
+            ast: parsed.ast,
+            content: parsed.content,
+          };
+          fitness = computeReplicativeFitness(fitnessCtx);
+        }
+
         if (ctx.json) {
-          output(ctx, '', { success: true, file: path.relative(process.cwd(), filePath), ...score });
+          output(ctx, '', {
+            success: true,
+            file: path.relative(process.cwd(), filePath),
+            ...score,
+            ...(fitness ? { replicativeFitness: fitness } : {}),
+          });
           return;
         }
 
@@ -59,7 +81,26 @@ export function registerMetricsCommand(
           lines.push(`                 ${dim.details}`);
         }
 
-        output(ctx, lines.join('\n'), score);
+        if (fitness) {
+          lines.push('');
+          lines.push(`  Replicative Fitness: ${fitness.composite}/28 — ${fitness.classification}`);
+          lines.push(`  Viable: ${fitness.viable ? 'YES' : 'NO'}`);
+          lines.push('');
+          lines.push('  Criteria:');
+          for (const [key, c] of Object.entries(fitness.criteria)) {
+            lines.push(`    ${c.label.padEnd(28)} ${fitnessBar(c.score)} ${c.score}/4`);
+            lines.push(`                               ${c.details}`);
+          }
+          if (fitness.vulnerabilities.length > 0) {
+            lines.push('');
+            lines.push('  Vulnerabilities:');
+            for (const v of fitness.vulnerabilities) {
+              lines.push(`    ⚠ ${v}`);
+            }
+          }
+        }
+
+        output(ctx, lines.join('\n'), { ...score, ...(fitness ? { replicativeFitness: fitness } : {}) });
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
         outputError(ctx, `Metrics error: ${message}`, { error: 'metrics_error', message });

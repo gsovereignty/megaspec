@@ -44,7 +44,7 @@ describe('docflow init', () => {
     ).toBe(true);
 
     // All should be created, none skipped
-    expect(result.created.length).toBe(11);
+    expect(result.created.length).toBe(12);
     expect(result.skipped.length).toBe(0);
   });
 
@@ -53,7 +53,7 @@ describe('docflow init', () => {
     const result = scaffold(tmpDir);
 
     expect(result.created.length).toBe(0);
-    expect(result.skipped.length).toBe(11);
+    expect(result.skipped.length).toBe(12);
   });
 
   it('reports skipped and created files on partial re-run', () => {
@@ -77,7 +77,7 @@ describe('docflow init', () => {
     expect(fs.existsSync(path.join(subDir, 'docflow', 'AGENTS.md'))).toBe(
       true,
     );
-    expect(result.created.length).toBe(11);
+    expect(result.created.length).toBe(12);
   });
 
   it('includes docflow/AGENTS.md in created list', () => {
