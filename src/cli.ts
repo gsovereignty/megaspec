@@ -1,5 +1,8 @@
 #!/usr/bin/env node
 
+import { readFileSync } from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname, resolve } from 'path';
 import { Command } from 'commander';
 import { createOutputContext, type OutputContext } from './utils/output-context.js';
 import { registerInitCommand } from './commands/init.js';
@@ -9,6 +12,10 @@ import { registerPublishCommand } from './commands/publish.js';
 import { registerArchiveCommand } from './commands/archive.js';
 import { registerMetricsCommand } from './commands/metrics.js';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const pkg = JSON.parse(readFileSync(resolve(__dirname, '..', 'package.json'), 'utf-8'));
+
 const program = new Command();
 
 program
@@ -16,7 +23,7 @@ program
   .description(
     'CLI tool that helps SMEs produce engaging, research-backed documentation',
   )
-  .version('0.1.0')
+  .version(pkg.version)
   .option('--json', 'Output results as JSON', false)
   .option('--no-interactive', 'Disable interactive prompts');
 

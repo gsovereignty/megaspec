@@ -1,11 +1,14 @@
 {
   "name": "docflow",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "CLI tool that helps SMEs produce engaging, research-backed documentation",
   "type": "module",
   "bin": {
     "docflow": "./dist/cli.js"
   },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc && cp -r src/templates dist/templates",
     "dev": "tsc --watch",
