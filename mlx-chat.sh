@@ -23,16 +23,135 @@ RECOMMENDED_MODELS=(
   "mlx-community/Meta-Llama-3.1-8B-Instruct-8bit"
   "mlx-community/Mistral-7B-Instruct-v0.3-4bit"
   "mlx-community/Mistral-Small-24B-Instruct-2501-4bit"
+  "mlx-community/Qwen3-0.6B-4bit"
+  "mlx-community/Qwen3-14B-4bit"
+  "mlx-community/Qwen3-30B-A3B-4bit"
+  "mlx-community/Qwen3-235B-A22B-4bit"
+  "mlx-community/Qwen3-Coder-Next-4bit"
+  "mlx-community/Qwen3-Coder-30B-A3B-Instruct-4bit"
   "mlx-community/Qwen2.5-7B-Instruct-4bit"
+  "mlx-community/Qwen2.5-14B-Instruct-4bit"
   "mlx-community/Qwen2.5-32B-Instruct-4bit"
   "mlx-community/Qwen2.5-32B-Instruct-8bit"
   "mlx-community/Qwen2.5-72B-Instruct-4bit"
+  "mlx-community/Qwen2.5-Coder-7B-Instruct-4bit"
+  "mlx-community/Qwen2.5-Coder-14B-Instruct-4bit"
   "mlx-community/Qwen2.5-Coder-32B-Instruct-4bit"
   "mlx-community/gemma-2-27b-it-4bit"
   "mlx-community/phi-4-4bit"
   "mlx-community/DeepSeek-R1-Distill-Qwen-32B-4bit"
   "mlx-community/DeepSeek-R1-Distill-Llama-70B-4bit"
 )
+
+# Other MLX models — niche use cases, extreme sizes, or older generations
+OTHER_MODELS=(
+  "mlx-community/Qwen3.5-4B-MLX-4bit"
+  "mlx-community/Qwen3.5-9B-MLX-4bit"
+  "mlx-community/Qwen3.5-27B-4bit"
+  "mlx-community/Qwen3.5-35B-A3B-4bit"
+  "mlx-community/Qwen3.5-122B-A10B-4bit"
+  "mlx-community/Qwen3.5-397B-A17B-4bit"
+  "mlx-community/Qwen3-4B-Thinking-2507-4bit"
+  "mlx-community/Qwen3-30B-A3B-Instruct-2507-4bit"
+  "mlx-community/Qwen3-235B-A22B-8bit"
+  "mlx-community/Qwen2.5-1.5B-Instruct-4bit"
+  "mlx-community/Qwen2.5-3B-Instruct-4bit"
+  "mlx-community/Qwen2.5-VL-3B-Instruct-4bit"
+  "mlx-community/Qwen2.5-VL-7B-Instruct-4bit"
+  "mlx-community/Qwen2.5-VL-7B-Instruct-8bit"
+  "mlx-community/Qwen2.5-Coder-1.5B-Instruct-4bit"
+  "mlx-community/Qwen3-VL-2B-Instruct-4bit"
+  "mlx-community/Qwen3-VL-4B-Instruct-4bit"
+  "mlx-community/Qwen3-VL-8B-Instruct-4bit"
+  "mlx-community/DeepSeek-R1-Distill-Qwen-1.5B-4bit"
+  "mlx-community/DeepSeek-R1-Distill-Qwen-7B-4bit"
+  "mlx-community/DeepSeek-R1-Distill-Qwen-14B-4bit"
+  "mlx-community/DeepSeek-R1-0528-Qwen3-8B-4bit"
+  "mlx-community/Qwen1.5-0.5B-Chat-4bit"
+)
+
+# ── Model metadata: "size|task" ──────────────────────────────────────────────
+# Looked up via get_model_info(). Used to display size and purpose in the menu.
+get_model_info() {
+  case "$1" in
+    # Llama
+    mlx-community/Llama-3.3-70B-Instruct-4bit)                echo "~40GB|chat" ;;
+    mlx-community/Meta-Llama-3.1-8B-Instruct-4bit)            echo "~5GB|chat" ;;
+    mlx-community/Meta-Llama-3.1-8B-Instruct-8bit)            echo "~9GB|chat" ;;
+    # Mistral
+    mlx-community/Mistral-7B-Instruct-v0.3-4bit)              echo "~4GB|chat" ;;
+    mlx-community/Mistral-Small-24B-Instruct-2501-4bit)       echo "~14GB|chat" ;;
+    # Qwen 3
+    mlx-community/Qwen3-0.6B-4bit)                            echo "~1GB|chat" ;;
+    mlx-community/Qwen3-14B-4bit)                             echo "~9GB|chat" ;;
+    mlx-community/Qwen3-30B-A3B-4bit)                         echo "~17GB|chat (MoE)" ;;
+    mlx-community/Qwen3-235B-A22B-4bit)                       echo "~130GB|chat (MoE)" ;;
+    mlx-community/Qwen3-Coder-Next-4bit)                      echo "~45GB|code" ;;
+    mlx-community/Qwen3-Coder-30B-A3B-Instruct-4bit)          echo "~17GB|code (MoE)" ;;
+    # Qwen 2.5
+    mlx-community/Qwen2.5-7B-Instruct-4bit)                   echo "~5GB|chat" ;;
+    mlx-community/Qwen2.5-14B-Instruct-4bit)                  echo "~9GB|chat" ;;
+    mlx-community/Qwen2.5-32B-Instruct-4bit)                  echo "~18GB|chat" ;;
+    mlx-community/Qwen2.5-32B-Instruct-8bit)                  echo "~34GB|chat" ;;
+    mlx-community/Qwen2.5-72B-Instruct-4bit)                  echo "~40GB|chat" ;;
+    mlx-community/Qwen2.5-Coder-7B-Instruct-4bit)             echo "~5GB|code" ;;
+    mlx-community/Qwen2.5-Coder-14B-Instruct-4bit)            echo "~9GB|code" ;;
+    mlx-community/Qwen2.5-Coder-32B-Instruct-4bit)            echo "~18GB|code" ;;
+    # Gemma / Phi
+    mlx-community/gemma-2-27b-it-4bit)                         echo "~16GB|chat" ;;
+    mlx-community/phi-4-4bit)                                  echo "~8GB|chat + reasoning" ;;
+    # DeepSeek R1
+    mlx-community/DeepSeek-R1-Distill-Qwen-32B-4bit)          echo "~18GB|reasoning" ;;
+    mlx-community/DeepSeek-R1-Distill-Llama-70B-4bit)          echo "~40GB|reasoning" ;;
+    # Qwen 3.5 (vision)
+    mlx-community/Qwen3.5-4B-MLX-4bit)                        echo "~3GB|vision + chat" ;;
+    mlx-community/Qwen3.5-9B-MLX-4bit)                        echo "~6GB|vision + chat" ;;
+    mlx-community/Qwen3.5-27B-4bit)                           echo "~16GB|vision + chat" ;;
+    mlx-community/Qwen3.5-35B-A3B-4bit)                       echo "~20GB|vision + chat (MoE)" ;;
+    mlx-community/Qwen3.5-122B-A10B-4bit)                     echo "~70GB|vision + chat (MoE)" ;;
+    mlx-community/Qwen3.5-397B-A17B-4bit)                     echo "~220GB|vision + chat (MoE)" ;;
+    # Qwen 3 (specialized)
+    mlx-community/Qwen3-4B-Thinking-2507-4bit)                echo "~3GB|reasoning" ;;
+    mlx-community/Qwen3-30B-A3B-Instruct-2507-4bit)           echo "~17GB|chat (MoE)" ;;
+    mlx-community/Qwen3-235B-A22B-8bit)                       echo "~250GB|chat (MoE)" ;;
+    # Qwen 2.5 (small / vision)
+    mlx-community/Qwen2.5-1.5B-Instruct-4bit)                 echo "~1GB|chat" ;;
+    mlx-community/Qwen2.5-3B-Instruct-4bit)                   echo "~2GB|chat" ;;
+    mlx-community/Qwen2.5-VL-3B-Instruct-4bit)                echo "~2GB|vision + chat" ;;
+    mlx-community/Qwen2.5-VL-7B-Instruct-4bit)                echo "~5GB|vision + chat" ;;
+    mlx-community/Qwen2.5-VL-7B-Instruct-8bit)                echo "~9GB|vision + chat" ;;
+    mlx-community/Qwen2.5-Coder-1.5B-Instruct-4bit)           echo "~1GB|code" ;;
+    # Qwen 3 VL
+    mlx-community/Qwen3-VL-2B-Instruct-4bit)                  echo "~2GB|vision + chat" ;;
+    mlx-community/Qwen3-VL-4B-Instruct-4bit)                  echo "~3GB|vision + chat" ;;
+    mlx-community/Qwen3-VL-8B-Instruct-4bit)                  echo "~5GB|vision + chat" ;;
+    # DeepSeek R1 (extra)
+    mlx-community/DeepSeek-R1-Distill-Qwen-1.5B-4bit)         echo "~1GB|reasoning" ;;
+    mlx-community/DeepSeek-R1-Distill-Qwen-7B-4bit)           echo "~5GB|reasoning" ;;
+    mlx-community/DeepSeek-R1-Distill-Qwen-14B-4bit)          echo "~9GB|reasoning" ;;
+    mlx-community/DeepSeek-R1-0528-Qwen3-8B-4bit)             echo "~5GB|reasoning" ;;
+    # Legacy
+    mlx-community/Qwen1.5-0.5B-Chat-4bit)                     echo "<1GB|chat (legacy)" ;;
+    *) echo "" ;;
+  esac
+}
+
+# Format a model line for display: "  NUM)  Model-Name       ~18GB  code"
+format_model_line() {
+  local idx="$1" model="$2" color="$3" status="$4"
+  local short="${model#mlx-community/}"
+  local info
+  info=$(get_model_info "$model")
+  if [[ -n "$info" ]]; then
+    local size="${info%%|*}"
+    local task="${info#*|}"
+    printf "  ${color}%3d${RESET})  %-38s ${CYAN}%6s${RESET}  %-20s ${DIM}%s${RESET}\n" \
+      "$idx" "$short" "$size" "$task" "$status"
+  else
+    printf "  ${color}%3d${RESET})  %-38s ${DIM}%28s${RESET}\n" \
+      "$idx" "$short" "$status"
+  fi
+}
 
 header() {
   echo ""
@@ -110,15 +229,34 @@ show_menu() {
     fi
   done
 
+  # Build other list (niche models NOT already installed)
+  local -a other=()
+  for rec in "${OTHER_MODELS[@]}"; do
+    local found=0
+    for inst in "${installed[@]}"; do
+      if [[ "$rec" == "$inst" ]]; then
+        found=1
+        break
+      fi
+    done
+    if [[ $found -eq 0 ]]; then
+      other+=("$rec")
+    fi
+  done
+
   local idx=1
+
+  # Column headers
+  local hdr
+  hdr=$(printf "  ${DIM}      %-38s %6s  %-20s${RESET}" "Model" "VRAM" "Optimized for")
 
   # Show installed section
   if [[ ${#installed[@]} -gt 0 ]]; then
     echo -e "${BOLD}${GREEN}  Installed models${RESET}"
-    echo -e "${DIM}  ─────────────────────────────────────────${RESET}"
+    echo -e "${DIM}  ─────────────────────────────────────────────────────────────────────────${RESET}"
+    echo -e "$hdr"
     for m in "${installed[@]}"; do
-      local short="${m#mlx-community/}"
-      printf "  ${GREEN}%3d${RESET})  %-45s ${DIM}[ready]${RESET}\n" "$idx" "$short"
+      format_model_line "$idx" "$m" "${GREEN}" "[ready]"
       ((idx++))
     done
     echo ""
@@ -127,13 +265,25 @@ show_menu() {
     echo ""
   fi
 
-  # Show available section
+  # Show recommended section
   if [[ ${#available[@]} -gt 0 ]]; then
-    echo -e "${BOLD}${YELLOW}  Available to download${RESET}"
-    echo -e "${DIM}  ─────────────────────────────────────────${RESET}"
+    echo -e "${BOLD}${YELLOW}  Recommended — general chat & code${RESET}"
+    echo -e "${DIM}  ─────────────────────────────────────────────────────────────────────────${RESET}"
+    echo -e "$hdr"
     for m in "${available[@]}"; do
-      local short="${m#mlx-community/}"
-      printf "  ${YELLOW}%3d${RESET})  %-45s ${DIM}[download]${RESET}\n" "$idx" "$short"
+      format_model_line "$idx" "$m" "${YELLOW}" "[download]"
+      ((idx++))
+    done
+    echo ""
+  fi
+
+  # Show other/niche section
+  if [[ ${#other[@]} -gt 0 ]]; then
+    echo -e "${BOLD}${DIM}  Other — vision, reasoning variants, older/extreme sizes${RESET}"
+    echo -e "${DIM}  ─────────────────────────────────────────────────────────────────────────${RESET}"
+    echo -e "$hdr"
+    for m in "${other[@]}"; do
+      format_model_line "$idx" "$m" "${DIM}" "[download]"
       ((idx++))
     done
     echo ""
@@ -160,6 +310,7 @@ show_menu() {
       local all_models=()
       for m in "${installed[@]}"; do all_models+=("$m"); done
       for m in "${available[@]}"; do all_models+=("$m"); done
+      for m in "${other[@]}"; do all_models+=("$m"); done
       SELECTED_MODEL="${all_models[$((choice - 1))]}"
       return
     fi
