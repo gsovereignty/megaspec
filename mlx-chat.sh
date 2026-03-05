@@ -4,8 +4,19 @@
 
 set -euo pipefail
 
-VENV_DIR="${MLX_VENV:-$HOME/.mlx-chat-venv}"
-HF_CACHE_DIR="${HF_HUB_CACHE:-$HOME/.cache/huggingface/hub}"
+# ── Data directory (required) ────────────────────────────────────────────────
+if [[ $# -lt 1 ]] || [[ -z "$1" ]]; then
+  echo "Usage: mlx-chat <data-dir>" >&2
+  echo "  <data-dir>  Directory for venv and model weights" >&2
+  exit 1
+fi
+
+DATA_DIR="$1"
+mkdir -p "$DATA_DIR"
+DATA_DIR="$(cd "$DATA_DIR" && pwd)"  # resolve to absolute path
+
+VENV_DIR="$DATA_DIR/venv"
+HF_CACHE_DIR="$DATA_DIR/models"
 export HF_HUB_CACHE="$HF_CACHE_DIR"
 
 # Colors
