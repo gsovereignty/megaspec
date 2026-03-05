@@ -201,7 +201,7 @@ get_installed_models() {
       fi
     done < <(ls "$HF_CACHE_DIR" 2>/dev/null | grep "^models--mlx-community" || true)
   fi
-  printf '%s\n' "${models[@]}"
+  printf '%s\n' ${models[@]+"${models[@]}"}
 }
 
 # ── Step 3: Build menu ──────────────────────────────────────────────────────
@@ -218,7 +218,7 @@ show_menu() {
   # Build available list (recommended models NOT already installed)
   for rec in "${RECOMMENDED_MODELS[@]}"; do
     local found=0
-    for inst in "${installed[@]}"; do
+    for inst in ${installed[@]+"${installed[@]}"}; do
       if [[ "$rec" == "$inst" ]]; then
         found=1
         break
@@ -233,7 +233,7 @@ show_menu() {
   local -a other=()
   for rec in "${OTHER_MODELS[@]}"; do
     local found=0
-    for inst in "${installed[@]}"; do
+    for inst in ${installed[@]+"${installed[@]}"}; do
       if [[ "$rec" == "$inst" ]]; then
         found=1
         break
@@ -308,9 +308,9 @@ show_menu() {
     if [[ "$choice" =~ ^[0-9]+$ ]] && (( choice >= 1 && choice <= total )); then
       # Map index to model name
       local all_models=()
-      for m in "${installed[@]}"; do all_models+=("$m"); done
-      for m in "${available[@]}"; do all_models+=("$m"); done
-      for m in "${other[@]}"; do all_models+=("$m"); done
+      for m in ${installed[@]+"${installed[@]}"}; do all_models+=("$m"); done
+      for m in ${available[@]+"${available[@]}"}; do all_models+=("$m"); done
+      for m in ${other[@]+"${other[@]}"}; do all_models+=("$m"); done
       SELECTED_MODEL="${all_models[$((choice - 1))]}"
       return
     fi
