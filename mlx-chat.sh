@@ -5,7 +5,8 @@
 set -euo pipefail
 
 VENV_DIR="${MLX_VENV:-$HOME/.mlx-chat-venv}"
-HF_CACHE_DIR="$HOME/.cache/huggingface/hub"
+HF_CACHE_DIR="${HF_HUB_CACHE:-$HOME/.cache/huggingface/hub}"
+export HF_HUB_CACHE="$HF_CACHE_DIR"
 
 # Colors
 BOLD='\033[1m'
